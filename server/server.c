@@ -9,7 +9,6 @@
 #include <sys/socket.h> 
 #include <sys/types.h> 
 
-#define MAX 30 
 #define PORT 8080
 
 
