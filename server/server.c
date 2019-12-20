@@ -67,9 +67,11 @@ void* DimThread(void* arg){
     
     management *man = ((management *) arg); 
 
-	man->par->dimFile = 10;
-	printf("From server: %d\n", man->par->dimFile);
-	send(man->fd, man->par, sizeof(man->par),0); 
+	int* num=(int*)malloc(sizeof(int));
+	*num=1077;
+	printf("From server: %d\n", *num);
+	send(man->fd, num, sizeof(int),0);
+	free(num);
     
     return NULL;
 } 
@@ -144,7 +146,6 @@ int main(){
     man->par = par;
 
     printf("The choice is: %d\n", par->choice);
-
      
     if(par->choice==1)
           pthread_create(&thread,NULL,DimThread,man); 
