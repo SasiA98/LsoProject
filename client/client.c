@@ -8,9 +8,9 @@
 #include <sys/socket.h> 
 #include <arpa/inet.h>
 #include <stdbool.h>
+
 #define MAX 80
-#define PORT 8080 
-#define SA struct sockaddr
+#define PORT 8080
 #define IP_PORT "127.0.0.1"
 
 
@@ -27,7 +27,7 @@ typedef struct parameters {
 
 
 int getInt();
-void func(int sockfd);
+void clientFunctions(int sockfd);
 int dimension(int socketfd);
 void getStr(char * str, uint len);
 
@@ -43,7 +43,7 @@ int main(){
 	// socket create and varification 
 	socketfd = socket(AF_INET, SOCK_STREAM, 0); 
 	if (socketfd == -1) { 
-		printf("socket creation failed...\n"); 
+		printf("Socket creation failed...\n"); 
 		exit(0); 
 	} 
 	else
@@ -57,15 +57,15 @@ int main(){
 	servaddr.sin_port = htons(PORT);
 
 	// connect the client socket to server socket 
-	if (connect(socketfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
-		printf("connection with the server failed...\n"); 
+	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 
+		printf("Connection with the server failed...\n"); 
 		exit(0); 
 	}
 	else
-		printf("connected to the server..\n"); 
+		printf("Connected to the server..\n"); 
 
 	// function for chat 
-	func(socketfd); 
+	clientFunctions(socketfd); 
 
 	// close the socket 
 	close(socketfd); 
@@ -101,7 +101,7 @@ int getInt(){
     return  num;
 }
 
-void func(int socketfd){ 
+void clientFunctions(int socketfd){ 
 
 	parameters* dataParameters=(parameters*)malloc(sizeof(parameters));
 
