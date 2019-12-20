@@ -78,7 +78,7 @@ int getInt(){
 }
 
 void func(int socketfd){ 
-	
+
 	intero* parameters=(intero*)malloc(sizeof(intero));
 
 	while(1) {  
@@ -100,22 +100,20 @@ void func(int socketfd){
 			break;
 		}
 
+
+
 		if(parameters->num==0){
 			printf("Esco.\n");
 			free(parameters);
 			break;
 		}
 		
+		
 		/*
 		send(sockfd,parameters,sizeof(parameters),0);
 		
 		recv(sockfd, parameters, sizeof(parameters),0);
 		printf("\nFrom Server : %d\n", parameters->num);
-		
-		if(!parameters->num){
-			free(parameters);
-			break;
-		}
 		*/
 	} 
 } 
