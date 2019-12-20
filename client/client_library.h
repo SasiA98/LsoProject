@@ -18,10 +18,12 @@
 typedef unsigned int uint;
 
 
+void getStr(char * str, uint len);
 int getInt();
 void clientFunctions(int sockfd);
 int dimension(int socketfd);
-void getStr(char * str, uint len);
+void readFile(int socketfd);
+void writeFile(int socketfd);
 
 
 typedef struct parameters {
