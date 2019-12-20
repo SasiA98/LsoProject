@@ -10,8 +10,7 @@
 #include <sys/types.h> 
 
 #define MAX 30 
-#define PORT 8080 
-#define SA struct sockaddr 
+#define PORT 8080
 
 
 typedef struct parameters {
@@ -78,12 +77,12 @@ void* DimThread(void* arg){
 
 int CreateSocket(){
 
-    int sockfd;
+    int socketfd;
     struct sockaddr_in serveraddr;
 
-    sockfd=socket(AF_INET,SOCK_STREAM,0);
-    if (sockfd == -1) { 
-		printf("socket creation failed...\n"); 
+    socketfd=socket(AF_INET,SOCK_STREAM,0);
+    if (socketfd == -1) { 
+		printf("Socket creation failed...\n"); 
 		exit(0); 
 	} 
 	else
@@ -96,15 +95,15 @@ int CreateSocket(){
     //  errore=fcntl(sock,F_SETFL,O_NONBLOCK); server non bloccante 
 
     //Bind del socket
-    if ((bind(sockfd, (SA*)&serveraddr, sizeof(serveraddr))) != 0) { 
-		printf("socket bind failed...\n"); 
+    if ((bind(socketfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) != 0) { 
+		printf("Socket bind failed...\n"); 
 		exit(0); 
 	} 
 	else
 		printf("Socket successfully binded..\n");   
 
     // Now server is ready to listen and verification 
-	if ((listen(sockfd, 5)) != 0) { 
+	if ((listen(socketfd, 5)) != 0) { 
 		printf("Listen failed...\n"); 
 		exit(0); 
 	} 
@@ -112,26 +111,24 @@ int CreateSocket(){
 		printf("Server listening..\n"); 
 
 
-    return sockfd;
+    return socketfd;
 }
 
-// Driver function 
-int main(){
 
-    management *man = (management *)malloc(sizeof(management));
+int main(){
 
 	signal(SIGPIPE, SIG_IGN);
 
-	int sockfd, connfd, len; 
-	struct sockaddr_in cli;
+	int socketfd, connfd, lenght; 
+	struct sockaddr_in client;
 	pthread_t thread;	
 
-    sockfd = CreateSocket();
-	len = sizeof(cli); 
+    socketfd = CreateSocket();
+	lenght = sizeof(client); 
 
   while(1){
 	// Accept the data packet from client and verification 
-	connfd = accept(sockfd, (SA*)&cli, (socklen_t*)&len); 
+	connfd = accept(socketfd, (struct sockaddr*)&client, (socklen_t*)&lenght); 
 	if (connfd < 0) { 
 		printf("server acccept failed...\n"); 
 		exit(0); 
@@ -142,6 +139,9 @@ int main(){
     parameters* par=(parameters*)malloc(sizeof(parameters));
 
     recv(connfd, par, sizeof(par),0);
+
+	management *man = (management *)malloc(sizeof(management));
+
     man->fd = connfd;
     man->par = par;
 
@@ -158,7 +158,7 @@ int main(){
     }
 
 	// After chatting close the socket 
-	close(sockfd); 
+	close(socketfd); 
 } 
 
 
