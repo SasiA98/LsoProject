@@ -8,26 +8,37 @@
 #include <signal.h>
 #include <sys/socket.h> 
 #include <sys/types.h> 
+
 #define MAX 30 
 #define PORT 8080 
 #define SA struct sockaddr 
 
-typedef struct intero {
-	int num;
-}intero;
 
-// Function designed for chat between client and server. 
-void* func(void* val){ 
-	
+typedef struct parameters {
+	int choice;
+    int from;
+    int to;
+    int dimFile;
+    char *buffer[];
+}parameters;
+
+typedef struct management{
+    int fd;
+    parameters *par;
+}management;
+ 
+
+void* ReadThread(void* args){ 
+/*	
 	int sockfd=(*(int*)val);
-    intero* peppe=(intero*)malloc(sizeof(intero));
+    parameters* par=(parameters*)malloc(sizeof(parameters));
 	// infinite loop for chat 
 	for (;;) {
 
 		// read the message from client and copy it in buffer 
-		recv(sockfd, peppe, sizeof(peppe),0); 
+		recv(sockfd, par, sizeof(par),0); 
 		// print buffer which contains the client contents 
-		printf("From client: %d\n", peppe->num);
+		printf("From client: %d\n", par->choice);
 		// copy server message in the buffer
         int a=peppe->num;
 		peppe->num=a*a;
@@ -44,12 +55,29 @@ void* func(void* val){
 		}
 		
 	} 
-	
-	return NULL;
+	*/
+    return NULL;
 } 
+
+void* WriteThread(void* val){ 
+       return NULL;
+} 
+
+void* DimThread(void* arg){ 
+    
+    management *man = ((management *) arg); 
+
+	man->par->dimFile = 10;
+	printf("From server: %d\n", man->par->dimFile);
+	send(man->fd, man->par, sizeof(man->par),0); 
+       return NULL;
+} 
+
 
 // Driver function 
 int main(){
+
+    management *man = (management *)malloc(sizeof(management));
 
 	signal(SIGPIPE, SIG_IGN);
 
@@ -97,14 +125,73 @@ int main(){
 		exit(0); 
 	} 
 	else
-		printf("server acccept the client...\n"); 
+		printf("server acccept the client...\n");
+    
+    parameters* par=(parameters*)malloc(sizeof(parameters));  
 
-	// Function for chatting between client and server 
-	int* val=(int*)malloc(sizeof(int));
-	*val=connfd;
-	pthread_create(&thread,NULL,func,val); 
+    recv(connfd, par, sizeof(par),0); 
+    man->fd = connfd;
+    man->par = par;
 
-  }
+    printf("The choice is: %d\n", par->choice);
+
+     
+    if(par->choice==1)
+          pthread_create(&thread,NULL,DimThread,NULL); 
+      else if(par->choice==2)	
+           pthread_create(&thread,NULL,ReadThread,man); 
+        else if(par->choice==3)	
+            pthread_create(&thread,NULL,WriteThread,man);
+
+    // GESTIRE SE INPUT DIVERSO DA 1/2/3
+    }
+
 	// After chatting close the socket 
 	close(sockfd); 
 } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+// Function designed for chat between client and server. 
+void* WriteThread(void* val){ 
+	
+	int sockfd=(*(int*)val);
+    parameters* par=(parameters*)malloc(sizeof(parameters));
+	// infinite loop for chat 
+	for (;;) {
+
+		// read the message from client and copy it in buffer 
+		recv(sockfd, par, sizeof(par),0); 
+		// print buffer which contains the client contents 
+		printf("From client: %d\n", par->choice);
+		// copy server message in the buffer
+        int a=peppe->num;
+		peppe->num=a*a;
+		
+		printf("From server: %d\n", peppe->num);
+		// and send that buffer to client 
+		send(sockfd, peppe, sizeof(peppe),0); 
+
+		// if msg contains "Exit" then server exit and chat ended. 
+		if(!peppe->num){
+			free(val);
+			free(peppe);
+			break;
+		}
+		
+	} 
+	
+	return NULL;
+} 
+*/
