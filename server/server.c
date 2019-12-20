@@ -60,7 +60,7 @@ void* ReadThread(void* args){
 } 
 
 void* WriteThread(void* val){ 
-       return NULL;
+    return NULL;
 } 
 
 void* DimThread(void* arg){ 
@@ -70,9 +70,48 @@ void* DimThread(void* arg){
 	man->par->dimFile = 10;
 	printf("From server: %d\n", man->par->dimFile);
 	send(man->fd, man->par, sizeof(man->par),0); 
-       return NULL;
+    
+    return NULL;
 } 
 
+int CreateSocket(){
+
+    int sockfd;
+    struct sockaddr_in serveraddr;
+
+    sockfd=socket(AF_INET,SOCK_STREAM,0);
+    if (sockfd == -1) { 
+		printf("socket creation failed...\n"); 
+		exit(0); 
+	} 
+	else
+		printf("Socket successfully created..\n"); 
+
+    serveraddr.sin_family=AF_INET;
+    serveraddr.sin_addr.s_addr=INADDR_ANY;
+    serveraddr.sin_port=htons(PORT);
+
+    //  errore=fcntl(sock,F_SETFL,O_NONBLOCK); server non bloccante 
+
+    //Bind del socket
+    if ((bind(sockfd, (SA*)&serveraddr, sizeof(serveraddr))) != 0) { 
+		printf("socket bind failed...\n"); 
+		exit(0); 
+	} 
+	else
+		printf("Socket successfully binded..\n");   
+
+    // Now server is ready to listen and verification 
+	if ((listen(sockfd, 5)) != 0) { 
+		printf("Listen failed...\n"); 
+		exit(0); 
+	} 
+	else
+		printf("Server listening..\n"); 
+
+
+    return sockfd;
+}
 
 // Driver function 
 int main(){
@@ -82,39 +121,10 @@ int main(){
 	signal(SIGPIPE, SIG_IGN);
 
 	int sockfd, connfd, len; 
-	struct sockaddr_in servaddr, cli;
+	struct sockaddr_in cli;
 	pthread_t thread;	
 
-	// socket create and verification 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0); 
-	if (sockfd == -1) { 
-		printf("socket creation failed...\n"); 
-		exit(0); 
-	} 
-	else
-		printf("Socket successfully created..\n"); 
-	bzero(&servaddr, sizeof(servaddr)); 
-
-	// assign IP, PORT 
-	servaddr.sin_family = AF_INET; 
-	servaddr.sin_addr.s_addr = htonl(INADDR_ANY); 
-	servaddr.sin_port = htons(PORT); 
-
-	// Binding newly created socket to given IP and verification 
-	if ((bind(sockfd, (SA*)&servaddr, sizeof(servaddr))) != 0) { 
-		printf("socket bind failed...\n"); 
-		exit(0); 
-	} 
-	else
-		printf("Socket successfully binded..\n"); 
-
-	// Now server is ready to listen and verification 
-	if ((listen(sockfd, 5)) != 0) { 
-		printf("Listen failed...\n"); 
-		exit(0); 
-	} 
-	else
-		printf("Server listening..\n"); 
+    sockfd = CreateSocket();
 	len = sizeof(cli); 
 
   while(1){
@@ -137,7 +147,7 @@ int main(){
 
      
     if(par->choice==1)
-          pthread_create(&thread,NULL,DimThread,NULL); 
+          pthread_create(&thread,NULL,DimThread,man); 
       else if(par->choice==2)	
            pthread_create(&thread,NULL,ReadThread,man); 
         else if(par->choice==3)	
