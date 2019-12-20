@@ -17,10 +17,12 @@
 
 typedef unsigned int uint;
 
+
 int getInt();
 void clientFunctions(int sockfd);
 int dimension(int socketfd);
 void getStr(char * str, uint len);
+
 
 typedef struct parameters {
 	int choice;
