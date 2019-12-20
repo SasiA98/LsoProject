@@ -56,9 +56,9 @@ void clientFunctions(int socketfd){
 		switch (dataParameters->choice){
 			case 1: printf("Dimensione:%d\n",dimension(socketfd));
 			break;
-			case 2: printf("Qui ti faccio leggere da file.\n");
+			case 2: readFile(socketfd);
 			break;
-			case 3: printf("Qui ti faccio inserire la stringa nel file.\n");
+			case 3: writeFile(socketfd);
 			break;
 		}
 
@@ -84,4 +84,14 @@ int dimension(int socketfd){
 	free(num);
 
 	return dim;
+}
+
+void readFile(int socketfd){
+    printf("Qui si legge dal file.\n");
+
+}
+
+void writeFile(int socketfd){
+    printf("Qui si scrive sul file.\n");
+
 }
