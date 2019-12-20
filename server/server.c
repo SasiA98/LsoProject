@@ -137,9 +137,9 @@ int main(){
 	else
 		printf("server acccept the client...\n");
     
-    parameters* par=(parameters*)malloc(sizeof(parameters));  
+    parameters* par=(parameters*)malloc(sizeof(parameters));
 
-    recv(connfd, par, sizeof(par),0); 
+    recv(connfd, par, sizeof(par),0);
     man->fd = connfd;
     man->par = par;
 
@@ -148,7 +148,7 @@ int main(){
      
     if(par->choice==1)
           pthread_create(&thread,NULL,DimThread,man); 
-      else if(par->choice==2)	
+      else if(par->choice==2)
            pthread_create(&thread,NULL,ReadThread,man); 
         else if(par->choice==3)	
             pthread_create(&thread,NULL,WriteThread,man);
