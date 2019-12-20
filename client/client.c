@@ -144,13 +144,14 @@ void func(int socketfd){
 }
 
 int dimension(int socketfd){
-	parameters* dataParameters=(parameters*)malloc(sizeof(parameters));
 
-	recv(socketfd, dataParameters, sizeof(dataParameters),0);
+	int* num=(int*)malloc(sizeof(int));
 
-	int dim=dataParameters->dimFile;
+	recv(socketfd, num, sizeof(int),0);
 
-	free(dataParameters);
+	int dim=*num;
+
+	free(num);
 
 	return dim;
 }
