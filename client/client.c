@@ -6,7 +6,8 @@
 #include <signal.h>
 #include <sys/socket.h> 
 #include <arpa/inet.h>
-#define MAX 80 
+#include <stdbool.h>
+#define MAX 80
 #define PORT 8080 
 #define SA struct sockaddr
 #define IP_PORT "127.0.0.1"
@@ -14,35 +15,22 @@
 
 typedef struct intero {
 	int num;
+	char* s;
 }intero;
 
-void func(int sockfd){ 
-	intero* peppe=(intero*)malloc(sizeof(intero));
-	for (;;) {  
-		printf("Enter the numb : ");
-		scanf("%d",&peppe->num);
-		send(sockfd,peppe,sizeof(peppe),0);
-		
-		recv(sockfd, peppe, sizeof(peppe),0);
-		printf("\nFrom Server : %d\n", peppe->num);
-		
-		if(!peppe->num){
-			free(peppe);
-			break;
-		}
-	} 
-} 
+int getInt();
+void func(int sockfd);
 
 int main(){ 
 
 	signal(SIGPIPE, SIG_IGN);
 
-	int sockfd; 
+	int socketfd; 
 	struct sockaddr_in servaddr; 
 
 	// socket create and varification 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0); 
-	if (sockfd == -1) { 
+	socketfd = socket(AF_INET, SOCK_STREAM, 0); 
+	if (socketfd == -1) { 
 		printf("socket creation failed...\n"); 
 		exit(0); 
 	} 
@@ -57,7 +45,7 @@ int main(){
 	servaddr.sin_port = htons(PORT);
 
 	// connect the client socket to server socket 
-	if (connect(sockfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
+	if (connect(socketfd, (SA*)&servaddr, sizeof(servaddr)) != 0) { 
 		printf("connection with the server failed...\n"); 
 		exit(0); 
 	}
@@ -65,8 +53,67 @@ int main(){
 		printf("connected to the server..\n"); 
 
 	// function for chat 
-	func(sockfd); 
+	func(socketfd); 
 
 	// close the socket 
-	close(sockfd); 
+	close(socketfd); 
+} 
+
+int getInt(){
+    int num;
+    bool vuoto;
+    char* fine;
+    char* temp=(char*)malloc(sizeof(char)* 20);
+    do {
+        getStr(temp, 10);
+
+        if(strlen(temp)==0) vuoto=true;
+        else vuoto=false;
+
+        num = strtol(temp, &fine, 10);
+        if(*fine!='\0' || vuoto) printf("\nValore errato, inserire di nuovo:");
+    }while (*fine!='\0' || vuoto);
+    free(temp);
+    return  num;
+}
+
+void func(int socketfd){ 
+
+	intero* parameters=(intero*)malloc(sizeof(intero));
+
+	while(1) {  
+		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
+		
+		parameters->num=-1;
+
+		while(parameters->num<0 || parameters->num>3){
+			printf("Valore fuori dal range!\nInserire di nuovo:");
+			parameters->num=getInt();
+		}
+
+		switch (parameters->num){
+			case 1: printf("Qui ti dico la dimensione.\n");
+			break;
+			case 2: printf("Qui ti faccio leggere da file.\n");
+			break;
+			case 3: printf("Qui ti faccio inserire la stringa nel file.\n");
+			break;
+		}
+
+
+
+		if(parameters->num==0){
+			printf("Esco.\n");
+			free(parameters);
+			break;
+		}
+		
+		
+		/*
+		send(sockfd,parameters,sizeof(parameters),0);
+		
+		recv(sockfd, parameters, sizeof(parameters),0);
+		printf("\nFrom Server : %d\n", parameters->num);
+		*/
+	} 
 } 
