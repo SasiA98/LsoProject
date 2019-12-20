@@ -65,7 +65,7 @@ int getInt(){
     char* fine;
     char* temp=(char*)malloc(sizeof(char)* 20);
     do {
-        getStr(temp, 20);
+        getStr(temp, 10);
 
         if(strlen(temp)==0) vuoto=true;
         else vuoto=false;
@@ -78,22 +78,26 @@ int getInt(){
 }
 
 void func(int socketfd){ 
+	
 	intero* parameters=(intero*)malloc(sizeof(intero));
+
 	while(1) {  
-		printf("Benvenuto\nInserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
+		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
 		
-		parameters->num=getInt();
+		parameters->num=-1;
 
-		if(parameters->num==1){
-			printf("Qui ti dico la dimensione.\n");
+		while(parameters->num<0 || parameters->num>3){
+			printf("Valore fuori dal range!\nInserire di nuovo:");
+			parameters->num=getInt();
 		}
 
-		if(parameters->num==2){
-			printf("Qui ti faccio leggere da file.\n");
-		}
-
-		if(parameters->num==3){
-			printf("Qui ti faccio inserire la stringa nel file.\n");
+		switch (parameters->num){
+			case 1: printf("Qui ti dico la dimensione.\n");
+			break;
+			case 2: printf("Qui ti faccio leggere da file.\n");
+			break;
+			case 3: printf("Qui ti faccio inserire la stringa nel file.\n");
+			break;
 		}
 
 		if(parameters->num==0){
