@@ -103,27 +103,27 @@ int getInt(){
 
 void func(int socketfd){ 
 
-	parameters* structParameters=(parameters*)malloc(sizeof(parameters));
+	parameters* dataParameters=(parameters*)malloc(sizeof(parameters));
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
 		
-		structParameters->choice=-1;
+		dataParameters->choice=getInt();
 
-		while(structParameters->choice<0 || structParameters->choice>3){
+		while(dataParameters->choice<0 || dataParameters->choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
-			structParameters->choice=getInt();
+			dataParameters->choice=getInt();
 		}
 
-		send(socketfd,structParameters,sizeof(structParameters),0);
+		send(socketfd,dataParameters,sizeof(dataParameters),0);
 
-		if(structParameters->choice==0){
+		if(dataParameters->choice==0){
 			printf("Esco.\n");
-			free(structParameters);
+			free(dataParameters);
 			break;
 		}
 
-		switch (structParameters->choice){
+		switch (dataParameters->choice){
 			case 1: printf("Dimensione:%d\n",dimension(socketfd));
 			break;
 			case 2: printf("Qui ti faccio leggere da file.\n");
@@ -148,7 +148,7 @@ int dimension(int socketfd){
 
 	recv(socketfd, dataParameters, sizeof(dataParameters),0);
 
-	int dim=dataParameters->choice;
+	int dim=dataParameters->dimFile;
 
 	free(dataParameters);
 
