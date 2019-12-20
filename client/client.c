@@ -3,6 +3,7 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <string.h>
+#include <assert.h>
 #include <signal.h>
 #include <sys/socket.h> 
 #include <arpa/inet.h>
@@ -13,13 +14,22 @@
 #define IP_PORT "127.0.0.1"
 
 
+typedef unsigned int uint;
+
 typedef struct intero {
 	int num;
 	char* s;
+	int dim;
 }intero;
+
+
 
 int getInt();
 void func(int sockfd);
+int dimension(int socketfd);
+void getStr(char * str, uint len);
+
+
 
 int main(){ 
 
@@ -59,6 +69,18 @@ int main(){
 	close(socketfd); 
 } 
 
+void getStr(char * str, uint len)
+{
+  assert(str != NULL);
+  uint i;
+  char c;
+  for(i = 0; (i < len) && ((c = getchar()) != '\n') && (c != EOF); ++i)
+    {
+      str[i] = c;
+    }
+  str[i] = '\0';
+}
+
 int getInt(){
     int num;
     bool vuoto;
@@ -91,8 +113,16 @@ void func(int socketfd){
 			parameters->num=getInt();
 		}
 
+		send(socketfd,parameters,sizeof(parameters),0);
+
+		if(parameters->num==0){
+			printf("Esco.\n");
+			free(parameters);
+			break;
+		}
+
 		switch (parameters->num){
-			case 1: printf("Qui ti dico la dimensione.\n");
+			case 1: printf("Dimensione:%d\n",dimension(socketfd));
 			break;
 			case 2: printf("Qui ti faccio leggere da file.\n");
 			break;
@@ -101,13 +131,6 @@ void func(int socketfd){
 		}
 
 
-
-		if(parameters->num==0){
-			printf("Esco.\n");
-			free(parameters);
-			break;
-		}
-		
 		
 		/*
 		send(sockfd,parameters,sizeof(parameters),0);
@@ -115,5 +138,17 @@ void func(int socketfd){
 		recv(sockfd, parameters, sizeof(parameters),0);
 		printf("\nFrom Server : %d\n", parameters->num);
 		*/
-	} 
-} 
+	}
+}
+
+int dimension(int socketfd){
+	intero* parameters=(intero*)malloc(sizeof(intero));
+
+	recv(socketfd, parameters, sizeof(parameters),0);
+
+	int dim=parameters->dim;
+
+	free(parameters);
+
+	return dim;
+}
