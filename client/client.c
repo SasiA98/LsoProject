@@ -16,11 +16,13 @@
 
 typedef unsigned int uint;
 
-typedef struct intero {
-	int num;
-	char* s;
-	int dim;
-}intero;
+typedef struct parameters {
+	int choice;
+    int from;
+    int to;
+    int dimFile;
+    char *buffer[];
+}parameters;
 
 
 
@@ -101,27 +103,27 @@ int getInt(){
 
 void func(int socketfd){ 
 
-	intero* parameters=(intero*)malloc(sizeof(intero));
+	parameters* structParameters=(parameters*)malloc(sizeof(parameters));
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
 		
-		parameters->num=-1;
+		structParameters->choice=-1;
 
-		while(parameters->num<0 || parameters->num>3){
+		while(structParameters->choice<0 || structParameters->choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
-			parameters->num=getInt();
+			structParameters->choice=getInt();
 		}
 
-		send(socketfd,parameters,sizeof(parameters),0);
+		send(socketfd,structParameters,sizeof(structParameters),0);
 
-		if(parameters->num==0){
+		if(structParameters->choice==0){
 			printf("Esco.\n");
-			free(parameters);
+			free(structParameters);
 			break;
 		}
 
-		switch (parameters->num){
+		switch (structParameters->choice){
 			case 1: printf("Dimensione:%d\n",dimension(socketfd));
 			break;
 			case 2: printf("Qui ti faccio leggere da file.\n");
@@ -142,13 +144,13 @@ void func(int socketfd){
 }
 
 int dimension(int socketfd){
-	intero* parameters=(intero*)malloc(sizeof(intero));
+	parameters* dataParameters=(parameters*)malloc(sizeof(parameters));
 
-	recv(socketfd, parameters, sizeof(parameters),0);
+	recv(socketfd, dataParameters, sizeof(dataParameters),0);
 
-	int dim=parameters->dim;
+	int dim=dataParameters->choice;
 
-	free(parameters);
+	free(dataParameters);
 
 	return dim;
 }
