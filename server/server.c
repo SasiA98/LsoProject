@@ -137,7 +137,7 @@ int main(){
 
      
     if(par->choice==1)
-          pthread_create(&thread,NULL,DimThread,NULL); 
+          pthread_create(&thread,NULL,DimThread,man); 
       else if(par->choice==2)	
            pthread_create(&thread,NULL,ReadThread,man); 
         else if(par->choice==3)	
