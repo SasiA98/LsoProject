@@ -20,6 +20,7 @@ typedef struct parameters {
     char *buffer[];
 }parameters;
 
+
 typedef struct management{
     int fd;
     parameters *par;
