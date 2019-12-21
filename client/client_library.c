@@ -75,14 +75,21 @@ void clientFunctions(int socketfd){
 
 int dimension(int socketfd){
 
+/*
+	//Non funziona
+
+	parameters* par=(parameters*)malloc(sizeof(parameters));
+	recv(socketfd, par, sizeof(par),0);
+	int dim=par->dimFile;
+	free(par);
+*/
+
+
 	int* num=(int*)malloc(sizeof(int));
-
 	recv(socketfd, num, sizeof(int),0);
-
 	int dim=*num;
-
 	free(num);
-
+	
 	return dim;
 }
 
