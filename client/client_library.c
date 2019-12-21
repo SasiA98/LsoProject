@@ -80,7 +80,7 @@ int dimension(int socketfd){
 
 	parameters* par=(parameters*)malloc(sizeof(parameters));
 	recv(socketfd, par, sizeof(par),0);
-	int dim=par->dimFile;
+	int dim=par->dimFile; //La lettura di dimFile riesce : Genny
 	free(par);
 */
 
@@ -89,7 +89,7 @@ int dimension(int socketfd){
 	recv(socketfd, num, sizeof(int),0);
 	int dim=*num;
 	free(num);
-	
+
 	return dim;
 }
 
