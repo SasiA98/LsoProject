@@ -64,16 +64,67 @@ void* WriteThread(void* val){
 
 void* DimThread(void* arg){ 
     
-    management *man = ((management *) arg); 
+	management *man = ((management *) arg);
+
+	/*
+
+	//Non funziona.
+
+	man->par->dimFile=10;
+
+	printf("From server: %d\n", man->par->dimFile);
+	send(man->fd, man->par, sizeof(man->par),0);	
+*/
 
 	int* num=(int*)malloc(sizeof(int));
-	*num=1077;
+	*num=10;
 	printf("From server: %d\n", *num);
 	send(man->fd, num, sizeof(int),0);
 	free(num);
-    
+
     return NULL;
 } 
+
+void* mainThread(void* arg){
+
+	int connfd = *((int *)arg);
+
+	pthread_t threadDim, threadRead, threadWrite;
+
+	parameters* par=(parameters*)malloc(sizeof(parameters));
+
+	management *man = (management *)malloc(sizeof(management));
+	man->fd = connfd;
+
+	while(1){
+		recv(connfd, par, sizeof(par),0);
+    	man->par = par;
+
+    	printf("The choice is: %d\n", par->choice);
+     
+    	if(par->choice==1){
+			pthread_create(&threadDim,NULL,DimThread,man);
+			pthread_join(threadDim,NULL);
+		}
+    	if(par->choice==2){
+        	pthread_create(&threadRead,NULL,ReadThread,man);
+			pthread_join(threadRead,NULL);
+		} 
+		if(par->choice==3){
+        	pthread_create(&threadWrite,NULL,WriteThread,man);
+			pthread_join(threadWrite,NULL);
+		}
+		if(par->choice==0){
+			free(par);
+			free(man);
+			free(arg);
+			break;
+			}
+	}
+
+	// GESTIRE SE INPUT DIVERSO DA 1/2/3 : Sasy
+	return NULL;
+}
 
 int CreateSocket(){
 
@@ -121,7 +172,7 @@ int main(){
 
 	int socketfd, connfd, lenght; 
 	struct sockaddr_in client;
-	pthread_t thread;	
+	pthread_t threadMain;	
 
     socketfd = CreateSocket();
 	lenght = sizeof(client); 
@@ -136,25 +187,10 @@ int main(){
 	else
 		printf("server acccept the client...\n");
     
-    parameters* par=(parameters*)malloc(sizeof(parameters));
-
-    recv(connfd, par, sizeof(par),0);
-
-	management *man = (management *)malloc(sizeof(management));
-
-    man->fd = connfd;
-    man->par = par;
-
-    printf("The choice is: %d\n", par->choice);
-     
-    if(par->choice==1)
-          pthread_create(&thread,NULL,DimThread,man); 
-      else if(par->choice==2)
-           pthread_create(&thread,NULL,ReadThread,man); 
-        else if(par->choice==3)	
-            pthread_create(&thread,NULL,WriteThread,man);
-
-    // GESTIRE SE INPUT DIVERSO DA 1/2/3
+    int* val=(int*)malloc(sizeof(int));
+	*val=connfd;
+	pthread_create(&threadMain,NULL,mainThread,val);
+	pthread_detach(threadMain);
     }
 
 	// After chatting close the socket 
