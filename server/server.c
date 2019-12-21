@@ -66,15 +66,15 @@ void* DimThread(void* arg){
     
 	management *man = ((management *) arg);
 
-	/*
-
+/*
 	//Non funziona.
 
-	man->par->dimFile=10;
+	man->par->dimFile=10; //Se si sostituisce dimFile con choice funziona (modificando il client naturalmente). : Genny
 
 	printf("From server: %d\n", man->par->dimFile);
-	send(man->fd, man->par, sizeof(man->par),0);	
+	send(man->fd, man->par, sizeof(man->par),0);
 */
+
 
 	int* num=(int*)malloc(sizeof(int));
 	*num=10;
