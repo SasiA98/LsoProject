@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "client_library.h": "c",
-        "socket.h": "c"
+        "socket.h": "c",
+        "serialization.h": "c"
     }
 }

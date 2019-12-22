@@ -11,7 +11,6 @@
 
 #define PORT 8080
 
-
 typedef struct {
 	int choice;
     int from;
@@ -27,6 +26,14 @@ typedef struct management{
 }management;
  
 
+ unsigned char * serialize_int(unsigned char *buffer, int value);
+unsigned char * serialize_char(unsigned char *buffer, char value);
+int deserialize_int(unsigned char *buffer);
+char deserialize_char(unsigned char *buffer);
+unsigned char* serializeParameters(unsigned char* msg, parameters par);
+parameters deserializeParameters(unsigned char* buffer, parameters par);
+
+
 void* readThread(void* args){ 
     return NULL;
 } 
@@ -38,10 +45,12 @@ void* writeThread(void* val){
 void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
-
-	man->par.dimFile = 10;
-	printf("From server: %d\n", man->par.dimFile);
-  	write(man->fd, &(man->par), sizeof(man->par));
+    
+	man->par.choice=123;
+	
+    unsigned char buffer[100]; //Controllare i tipi : sasy
+	serializeParameters(buffer, man->par); 
+  	write(man->fd, &buffer, sizeof(buffer));
 
     return NULL;
 } 
@@ -57,11 +66,15 @@ void* mainThread(void* arg){
     parameters par;
 
 	while(1){
-		read(connfd, &par, sizeof(par));
-    	man->par = par;
+		
+		unsigned char buffer[100];
+        read(connfd, &buffer, sizeof(buffer));
+		par = deserializeParameters(buffer, par);
+		
+		man->par = par;
 
     	printf("The choice is: %d\n", par.choice);
-     
+
     	if(par.choice==1){
 			pthread_create(&threadDim,NULL,dimThread,man);
 			pthread_join(threadDim,NULL);
@@ -75,11 +88,10 @@ void* mainThread(void* arg){
 			pthread_join(threadWrite,NULL);
 		}
 		if(par.choice==0){
-			//free(par);
 			free(man);
 			free(arg);
 			break;
-			}
+			} 
 	}
 
 	// GESTIRE SE INPUT DIVERSO DA 1/2/3 : Sasy
@@ -163,7 +175,75 @@ int main(){
 
 
 
+unsigned char * serialize_int(unsigned char *buffer, int value)
+{
+    buffer[0] = value >> 24;
+    buffer[1] = value >> 16;
+    buffer[2] = value >> 8;
+    buffer[3] = value;
+    return buffer + 4;
+}
 
+unsigned char * serialize_char(unsigned char *buffer, char value)
+{
+    buffer[0] = value;
+    return buffer + 1;
+}
+
+int deserialize_int(unsigned char *buffer)
+{
+    int value = 0;
+
+    value |= buffer[0] << 24;
+    value |= buffer[1] << 16;
+    value |= buffer[2] << 8;
+    value |= buffer[3];
+    return value;
+
+}
+
+char deserialize_char(unsigned char *buffer)
+{
+    return buffer[0];
+}
+
+
+
+unsigned char* serializeParameters(unsigned char* buffer, parameters par)
+{
+    buffer = serialize_int(buffer,par.choice);
+    buffer = serialize_int(buffer,par.from);   
+	buffer = serialize_int(buffer,par.to);
+    buffer = serialize_int(buffer,par.dimFile);
+
+	for(int i=0; i<strlen(par.buffer)+1; i++)
+        buffer = serialize_char(buffer,par.buffer[i]);  
+       
+    return buffer;
+}
+
+
+parameters deserializeParameters(unsigned char* buffer, parameters par)
+{
+    par.choice = deserialize_int(buffer);
+    par.from = deserialize_int(buffer+4);
+    par.to = deserialize_int(buffer+8);
+    par.dimFile = deserialize_int(buffer+12);    
+  
+    int i=0;
+    int j=16;
+    
+    do
+    {
+        par.buffer[i] = deserialize_char((buffer+j));
+        i++;
+        j++;
+    }while(par.buffer[i-1]!='\0'); 
+    
+    j++; 
+    
+    return par;
+}
 
 
 
