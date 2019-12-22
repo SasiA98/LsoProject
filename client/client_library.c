@@ -33,28 +33,28 @@ int getInt(){
 
 void clientFunctions(int socketfd){ 
 
-	parameters* dataParameters=(parameters*)malloc(sizeof(parameters));
+    parameters par;
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
 		
-		dataParameters->choice=getInt();
+		par.choice=getInt();
 
-		while(dataParameters->choice<0 || dataParameters->choice>3){
+		while(par.choice<0 || par.choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
-			dataParameters->choice=getInt();
+			par.choice=getInt();
 		}
 
-		send(socketfd,dataParameters,sizeof(dataParameters),0);
+		send(socketfd,&par,sizeof(par),0);
 
-		if(dataParameters->choice==0){
+		if(par.choice==0){
 			printf("Esco.\n");
-			free(dataParameters);
+			//free(dataParameters);
 			break;
 		}
 
-		switch (dataParameters->choice){
-			case 1: printf("Dimensione:%d\n",dimension(socketfd));
+		switch (par.choice){
+			case 1: dimension(socketfd);
 			break;
 			case 2: readFile(socketfd);
 			break;
@@ -73,24 +73,15 @@ void clientFunctions(int socketfd){
 	}
 }
 
-int dimension(int socketfd){
+void dimension(int socketfd){
 
-/*
-	//Non funziona
+	parameters par;
+	recv(socketfd, &par, sizeof(par),0);
+	int dim=par.dimFile; //La lettura di dimFile riesce : Genny
+//	free(par);
+    printf("SI: %d\n\n",par.dimFile); 
+    printf("SI: %d\n\n",dim); 
 
-	parameters* par=(parameters*)malloc(sizeof(parameters));
-	recv(socketfd, par, sizeof(par),0);
-	int dim=par->dimFile; //La lettura di dimFile riesce : Genny
-	free(par);
-*/
-
-
-	int* num=(int*)malloc(sizeof(int));
-	recv(socketfd, num, sizeof(int),0);
-	int dim=*num;
-	free(num);
-
-	return dim;
 }
 
 void readFile(int socketfd){

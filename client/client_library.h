@@ -21,17 +21,17 @@ typedef unsigned int uint;
 void getStr(char * str, uint len);
 int getInt();
 void clientFunctions(int sockfd);
-int dimension(int socketfd);
+void dimension(int socketfd);
 void readFile(int socketfd);
 void writeFile(int socketfd);
 
 
-typedef struct parameters {
+typedef struct {
 	int choice;
     int from;
     int to;
     int dimFile;
-    char *buffer[];
+    char buffer[100];
 }parameters;
 
 #endif

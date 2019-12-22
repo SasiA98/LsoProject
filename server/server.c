@@ -12,75 +12,36 @@
 #define PORT 8080
 
 
-typedef struct parameters {
+typedef struct {
 	int choice;
     int from;
     int to;
     int dimFile;
-    char *buffer[];
+    char buffer[100];
 }parameters;
 
 
 typedef struct management{
     int fd;
-    parameters *par;
+    parameters par;
 }management;
  
 
-void* ReadThread(void* args){ 
-/*	
-	int sockfd=(*(int*)val);
-    parameters* par=(parameters*)malloc(sizeof(parameters));
-	// infinite loop for chat 
-	for (;;) {
-
-		// read the message from client and copy it in buffer 
-		recv(sockfd, par, sizeof(par),0); 
-		// print buffer which contains the client contents 
-		printf("From client: %d\n", par->choice);
-		// copy server message in the buffer
-        int a=peppe->num;
-		peppe->num=a*a;
-		
-		printf("From server: %d\n", peppe->num);
-		// and send that buffer to client 
-		send(sockfd, peppe, sizeof(peppe),0); 
-
-		// if msg contains "Exit" then server exit and chat ended. 
-		if(!peppe->num){
-			free(val);
-			free(peppe);
-			break;
-		}
-		
-	} 
-	*/
+void* readThread(void* args){ 
     return NULL;
 } 
 
-void* WriteThread(void* val){ 
+void* writeThread(void* val){ 
     return NULL;
 } 
 
-void* DimThread(void* arg){ 
+void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
 
-/*
-	//Non funziona.
-
-	man->par->dimFile=10; //Se si sostituisce dimFile con choice funziona (modificando il client naturalmente). : Genny
-
-	printf("From server: %d\n", man->par->dimFile);
-	send(man->fd, man->par, sizeof(man->par),0);
-*/
-
-
-	int* num=(int*)malloc(sizeof(int));
-	*num=10;
-	printf("From server: %d\n", *num);
-	send(man->fd, num, sizeof(int),0);
-	free(num);
+	man->par.dimFile = 10;
+	printf("From server: %d\n", man->par.dimFile);
+  	write(man->fd, &(man->par), sizeof(man->par));
 
     return NULL;
 } 
@@ -91,31 +52,30 @@ void* mainThread(void* arg){
 
 	pthread_t threadDim, threadRead, threadWrite;
 
-	parameters* par=(parameters*)malloc(sizeof(parameters));
-
 	management *man = (management *)malloc(sizeof(management));
 	man->fd = connfd;
+    parameters par;
 
 	while(1){
-		recv(connfd, par, sizeof(par),0);
+		read(connfd, &par, sizeof(par));
     	man->par = par;
 
-    	printf("The choice is: %d\n", par->choice);
+    	printf("The choice is: %d\n", par.choice);
      
-    	if(par->choice==1){
-			pthread_create(&threadDim,NULL,DimThread,man);
+    	if(par.choice==1){
+			pthread_create(&threadDim,NULL,dimThread,man);
 			pthread_join(threadDim,NULL);
 		}
-    	if(par->choice==2){
-        	pthread_create(&threadRead,NULL,ReadThread,man);
+    	if(par.choice==2){
+        	pthread_create(&threadRead,NULL,readThread,man);
 			pthread_join(threadRead,NULL);
 		} 
-		if(par->choice==3){
-        	pthread_create(&threadWrite,NULL,WriteThread,man);
+		if(par.choice==3){
+        	pthread_create(&threadWrite,NULL,writeThread,man);
 			pthread_join(threadWrite,NULL);
 		}
-		if(par->choice==0){
-			free(par);
+		if(par.choice==0){
+			//free(par);
 			free(man);
 			free(arg);
 			break;

@@ -1,12 +1,12 @@
 #include "client_library.h"
 
-
 int main(){ 
-
+    
 	signal(SIGPIPE, SIG_IGN);
 
 	int socketfd; 
 	struct sockaddr_in servaddr; 
+
 
 	// socket create and varification 
 	socketfd = socket(AF_INET, SOCK_STREAM, 0); 
