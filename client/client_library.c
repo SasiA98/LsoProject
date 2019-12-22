@@ -1,5 +1,6 @@
 #include "client_library.h"
 
+
 unsigned char * serialize_int(unsigned char *buffer, int value);
 unsigned char * serialize_char(unsigned char *buffer, char value);
 int deserialize_int(unsigned char *buffer);

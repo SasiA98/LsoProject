@@ -7,11 +7,10 @@ int main(){
 	int socketfd; 
 	struct sockaddr_in servaddr; 
 
-
-	// socket create and varification 
+    // socket create and varification 
 	socketfd = socket(AF_INET, SOCK_STREAM, 0); 
 	if (socketfd == -1) { 
-		printf("Socket creation failed...\n"); 
+		perror("Socket creation failed"); 
 		exit(0); 
 	} 
 	else
@@ -26,7 +25,7 @@ int main(){
 
 	// connect the client socket to server socket 
 	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 
-		printf("Connection with the server failed...\n"); 
+		perror("Connection with the server failed"); 
 		exit(0); 
 	}
 	else

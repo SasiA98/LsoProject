@@ -8,6 +8,7 @@
 #include <signal.h>
 #include <sys/socket.h> 
 #include <sys/types.h> 
+#include <stdbool.h>
 
 #define PORT 8080
 
@@ -21,12 +22,12 @@ typedef struct {
 
 
 typedef struct management{
-    int fd;
+    int connectfd;
     parameters par;
 }management;
  
 
- unsigned char * serialize_int(unsigned char *buffer, int value);
+unsigned char * serialize_int(unsigned char *buffer, int value);
 unsigned char * serialize_char(unsigned char *buffer, char value);
 int deserialize_int(unsigned char *buffer);
 char deserialize_char(unsigned char *buffer);
@@ -47,54 +48,51 @@ void* dimThread(void* arg){
 	management *man = ((management *) arg);
     
 	man->par.choice=123;
-	
-    unsigned char buffer[100]; //Controllare i tipi : sasy
+    unsigned char buffer[100]; 
 	serializeParameters(buffer, man->par); 
-  	write(man->fd, &buffer, sizeof(buffer));
+  	write(man->connectfd, &buffer, sizeof(buffer));
 
     return NULL;
 } 
 
 void* mainThread(void* arg){
 
-	int connfd = *((int *)arg);
+    bool flag = true;
+	int connectfd = *((int *)arg);
 
 	pthread_t threadDim, threadRead, threadWrite;
 
 	management *man = (management *)malloc(sizeof(management));
-	man->fd = connfd;
+	man->connectfd = connectfd;
     parameters par;
 
-	while(1){
+	while(flag){
 		
 		unsigned char buffer[100];
-        read(connfd, &buffer, sizeof(buffer));
-		par = deserializeParameters(buffer, par);
-		
-		man->par = par;
+        if(0 == read(connectfd, &buffer, sizeof(buffer)))
+		   flag = false;
+		else{
+		   par = deserializeParameters(buffer, par);
+	       man->par = par;
 
-    	printf("The choice is: %d\n", par.choice);
+           printf("The choice is: %d\n", par.choice);
 
-    	if(par.choice==1){
-			pthread_create(&threadDim,NULL,dimThread,man);
-			pthread_join(threadDim,NULL);
+        	if(par.choice==1){
+	    		pthread_create(&threadDim,NULL,dimThread,man);
+		    	pthread_join(threadDim,NULL);
+ 	 	    }  
+     	    if(par.choice==2){
+            	pthread_create(&threadRead,NULL,readThread,man);
+		     	pthread_join(threadRead,NULL);
+		    } 
+		    if(par.choice==3){
+             	pthread_create(&threadWrite,NULL,writeThread,man);
+		    	pthread_join(threadWrite,NULL);
+	    	}
 		}
-    	if(par.choice==2){
-        	pthread_create(&threadRead,NULL,readThread,man);
-			pthread_join(threadRead,NULL);
-		} 
-		if(par.choice==3){
-        	pthread_create(&threadWrite,NULL,writeThread,man);
-			pthread_join(threadWrite,NULL);
-		}
-		if(par.choice==0){
-			free(man);
-			free(arg);
-			break;
-			} 
+		free(man);
+		free(arg);
 	}
-
-	// GESTIRE SE INPUT DIVERSO DA 1/2/3 : Sasy
 	return NULL;
 }
 
@@ -105,7 +103,7 @@ int CreateSocket(){
 
     socketfd=socket(AF_INET,SOCK_STREAM,0);
     if (socketfd == -1) { 
-		printf("Socket creation failed...\n"); 
+		perror("Socket creation failed"); 
 		exit(0); 
 	} 
 	else
@@ -115,11 +113,9 @@ int CreateSocket(){
     serveraddr.sin_addr.s_addr=INADDR_ANY;
     serveraddr.sin_port=htons(PORT);
 
-    //  errore=fcntl(sock,F_SETFL,O_NONBLOCK); server non bloccante 
-
     //Bind del socket
     if ((bind(socketfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) != 0) { 
-		printf("Socket bind failed...\n"); 
+		perror("Socket bind failed"); 
 		exit(0); 
 	} 
 	else
@@ -127,12 +123,11 @@ int CreateSocket(){
 
     // Now server is ready to listen and verification 
 	if ((listen(socketfd, 5)) != 0) { 
-		printf("Listen failed...\n"); 
+		perror("Listen failed"); 
 		exit(0); 
 	} 
 	else
 		printf("Server listening..\n"); 
-
 
     return socketfd;
 }
@@ -142,31 +137,32 @@ int main(){
 
 	signal(SIGPIPE, SIG_IGN);
 
-	int socketfd, connfd, lenght; 
+	int socketfd, connectfd, lenght; 
 	struct sockaddr_in client;
 	pthread_t threadMain;	
 
     socketfd = CreateSocket();
 	lenght = sizeof(client); 
 
-  while(1){
-	// Accept the data packet from client and verification 
-	connfd = accept(socketfd, (struct sockaddr*)&client, (socklen_t*)&lenght); 
-	if (connfd < 0) { 
-		printf("server acccept failed...\n"); 
-		exit(0); 
-	} 
-	else
-		printf("server acccept the client...\n");
+    while(1){
+	    // Accept the data packet from client and verification 
+	    connectfd = accept(socketfd, (struct sockaddr*)&client, (socklen_t*)&lenght); 
+	    if (connectfd < 0) { 
+	     	perror("server acccept failed"); 
+	     	exit(0); 
+	    } 
+     	else
+	     	printf("server acccept the client...\n");
     
-    int* val=(int*)malloc(sizeof(int));
-	*val=connfd;
-	pthread_create(&threadMain,NULL,mainThread,val);
-	pthread_detach(threadMain);
-    }
+        int* clientfd=(int*)malloc(sizeof(int));
+    	*clientfd=connectfd;
 
+    	pthread_create(&threadMain,NULL,mainThread,clientfd);
+      	pthread_detach(threadMain);
+	
+    }
 	// After chatting close the socket 
-	close(socketfd); 
+	close(socketfd);   
 } 
 
 
