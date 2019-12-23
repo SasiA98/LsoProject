@@ -1,7 +1,7 @@
 #include "server_library.h"
 
 int dimension;
-int port;
+int PORT;
 char nameFile[50];
 
 int are_args_invalid(int argc, const char *argv[]){
@@ -28,7 +28,7 @@ int are_args_invalid(int argc, const char *argv[]){
     if (p == NULL || *p != '\0'|| b<0) 
         return 4;
 
-    port=a;
+    PORT=a;
     strcpy(nameFile,argv[2]);
     dimension=b;
 
