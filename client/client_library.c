@@ -1,6 +1,7 @@
 #include "client_library.h"
 
 
+
 void getStr(char * str, uint len)
 {
   assert(str != NULL);
