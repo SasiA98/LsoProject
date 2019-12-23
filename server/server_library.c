@@ -137,7 +137,7 @@ void* writeThread(void* arg){
 	    strcpy(man->par->buffer,"OK\0"); 
 	}
     serializeParameters(buffer, man->par); 
-    write(man->connectfd, &buffer, sizeof(buffer)); 
+    write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
     
 	close(fd);
     return NULL;
@@ -177,7 +177,7 @@ void* readThread(void* arg){
 		strcpy(man->par->buffer,bufferFile); 
 	}
     serializeParameters(buffer, man->par); 
-    write(man->connectfd, &buffer, sizeof(buffer)); 
+    write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
     
 	close(fd);
     return NULL;
@@ -206,7 +206,7 @@ void* dimThread(void* arg){
     
 	
 	serializeParameters(buffer, man->par); 
-  	write(man->connectfd, &buffer, sizeof(buffer)); 
+  	write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
 
     close(fd); 
 
