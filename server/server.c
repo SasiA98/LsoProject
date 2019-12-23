@@ -22,6 +22,7 @@ struct mutex {
 
 
 typedef struct parameters{
+    bool error;	
 	int choice;
     int from;
     int to;
@@ -45,36 +46,42 @@ void serializeParameters(unsigned char* msg, parameters *par);
 parameters *deserializeParameters(unsigned char* buffer, parameters *par);
 
 
-void* readThread(void* arg){ 
+void* readThread(void* arg){   //I thinked to make an infinit cicle to wait the correct input of the client, but if the client dies, the server remains in loop and the management of mutex is more difficult : sasi
 	management *man = ((management *) arg);
 
-	int fd;
+	int fd, offset;
 	char bufferFile[1000];
-	unsigned char buffer[1000]; 
+	unsigned char buffer[1000];
 
 	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy 
 
-    
     if ((fd = open("Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
   
-    if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
+    if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1)
+	     perror("lseek error");      
+	
+	if(offset < man->par->to){ 		 //We could shift lseek directly in 'to' position and check if it gives a error.    
+	   strcpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0");
+	   man->par->error = true;
+
+	}else{
+		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
 	    perror("lseek error");   
-    
-	if (bufferSize != read(fd, bufferFile, bufferSize))    
-	    perror("read error"); 
+	
+		if (bufferSize != read(fd, bufferFile, bufferSize))    
+	        perror("read error"); 
 
-	bufferFile[bufferSize]='\0';	  
-	sleep(10);
-	strcpy(man->par->buffer,bufferFile); //Instead of return the struct parameters, we could return only the bufferFile 
+	    bufferFile[bufferSize]='\0';	 
+		strcpy(man->par->buffer,bufferFile); 
+	}
     serializeParameters(buffer, man->par); 
-
-  	write(man->connectfd, &buffer, sizeof(buffer)); // After two calls to the server, the function "write" doesn't work anche writes strige thinks on server :sasi (The Last) 
+    write(man->connectfd, &buffer, sizeof(buffer)); 
     
 	close(fd);
     return NULL;
-} 
-
+}
+   
 void* writeThread(void* arg){ 
     return NULL;
 } 
@@ -112,8 +119,6 @@ void* mainThread(void* arg){
 		else{
 		   par = deserializeParameters(buffer, par);
 	       man->par = par;
-
-           printf("The choice is: %d\n", par->choice);
 
         	if(par->choice==1){
 	    		pthread_create(&threadDim,NULL,dimThread,man);
@@ -207,6 +212,10 @@ int main(){
 
 
 
+
+
+
+
 unsigned char * serialize_int(unsigned char *buffer, int value)
 {
     buffer[0] = value >> 24;
@@ -243,7 +252,7 @@ char deserialize_char(unsigned char *buffer)
 
 void serializeParameters(unsigned char* buffer, parameters *par)
 {
-	
+	buffer = serialize_int(buffer,par->error);
     buffer = serialize_int(buffer,par->choice);
     buffer = serialize_int(buffer,par->from);   
 	buffer = serialize_int(buffer,par->to);
@@ -254,15 +263,17 @@ void serializeParameters(unsigned char* buffer, parameters *par)
 }
 
 
+
 parameters * deserializeParameters(unsigned char* buffer, parameters *par)
 {
-    par->choice = deserialize_int(buffer);
-    par->from = deserialize_int(buffer+4);
-    par->to = deserialize_int(buffer+8);
-    par->dimFile = deserialize_int(buffer+12);    
+    par->error = deserialize_int(buffer);
+    par->choice = deserialize_int(buffer+4);
+    par->from = deserialize_int(buffer+8);
+    par->to = deserialize_int(buffer+12);
+    par->dimFile = deserialize_int(buffer+16);    
   
     int i=0;
-    int j=16;
+    int j=20;
     
     do
     {

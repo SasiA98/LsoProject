@@ -40,11 +40,11 @@ int getInt(){
 }
 
 void clientFunctions(int socketfd){ 
-	parameters *par =(parameters *)malloc(sizeof(parameters));
+	parameters *par =(parameters *)malloc(sizeof(parameters)); // In C the initialization usually is automatic :sasi
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
-		par->choice=getInt(); // if I press cntr+d it goes into a loop
+		par->choice=getInt(); // if I press cntr+d it goes into a loop :sasi
 
 		while(par->choice<0 || par->choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
@@ -76,40 +76,40 @@ void dimension(int socketfd, parameters *par){
 
 	read(socketfd, &bufferR, sizeof(bufferR));
 	par = deserializeParameters(bufferR, par);
-
-    printf("1: %d\n\n",par->choice); 
-    printf("2: %d\n\n",par->from); 
-    printf("3: %d\n\n",par->to); 
-    printf("4: %s\n\n",par->buffer); 
-
 }
 
 void readFile(int socketfd,parameters *par){
     
-    unsigned char bufferR[1000], bufferW[1000];
-      
-    do
+    unsigned char bufferR[1000], bufferW[1000]; //Does it need clear the buffer when the client do a new request?
+    do 
     {
-        printf("Inserisci il range da leggere\n");
-        printf("From: ");
-        par->from=getInt(); 
-        printf("To: ");
-        par->to=getInt(); 
+        par->error = false; 
+        do
+        {
+            printf("Inserisci il range da leggere\n");
+            printf("From: ");
+            par->from=getInt(); 
+            printf("To: ");
+            par->to=getInt(); 
         
-        if(par->from > par->to)
-           printf("Errore: from dev'essere necessariamente maggiore o uguale di to\n");
+            if(par->from > par->to || par->from < 0) 
+               printf("Errore: from dev'essere necessariamente maggiore o uguale di to e maggiore di 0\n");
 
-    } while (par->from > par->to);
+        } while (par->from > par->to || par->from <0); //Check the conditions : sasi 
     
-    printf("%d e %d\n",par->from, par->to);
+        serializeParameters(bufferW, par); 
+        write(socketfd,&bufferW,sizeof(bufferW));
 
-    serializeParameters(bufferW, par); 
-    write(socketfd,&bufferW,sizeof(bufferW));
+    	read(socketfd, &bufferR, sizeof(bufferR));
+    	par = deserializeParameters(bufferR, par);  // How do I send a message to the client if the reading is no good? :sasi
+       
+        if(par->error == true)
+           printf("%s\n",par->buffer);
+        else   
+           printf("Ecco la stringa letta dal file :%s\n",par->buffer); 
 
-	read(socketfd, &bufferR, sizeof(bufferR));
-	par = deserializeParameters(bufferR, par);   // How do I send a message to the client if the reading is no good?
+    } while (par->error == true);
     
-    printf("Ecco la stringa letta dal file :%s\n",par->buffer); 
 
 }
 
@@ -165,7 +165,7 @@ char deserialize_char(unsigned char *buffer)
 
 void serializeParameters(unsigned char* buffer, parameters *par)
 {
-	
+	buffer = serialize_int(buffer,par->error);
     buffer = serialize_int(buffer,par->choice);
     buffer = serialize_int(buffer,par->from);   
 	buffer = serialize_int(buffer,par->to);
@@ -179,13 +179,14 @@ void serializeParameters(unsigned char* buffer, parameters *par)
 
 parameters * deserializeParameters(unsigned char* buffer, parameters *par)
 {
-    par->choice = deserialize_int(buffer);
-    par->from = deserialize_int(buffer+4);
-    par->to = deserialize_int(buffer+8);
-    par->dimFile = deserialize_int(buffer+12);    
+    par->error = deserialize_int(buffer);
+    par->choice = deserialize_int(buffer+4);
+    par->from = deserialize_int(buffer+8);
+    par->to = deserialize_int(buffer+12);
+    par->dimFile = deserialize_int(buffer+16);    
   
     int i=0;
-    int j=16;
+    int j=20;
     
     do
     {

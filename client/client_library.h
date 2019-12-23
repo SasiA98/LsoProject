@@ -18,6 +18,7 @@
 typedef unsigned int uint;
 
 typedef struct parameters{
+    bool error;    
 	int choice;
     int from;
     int to;
