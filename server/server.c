@@ -9,6 +9,9 @@
 #include <sys/socket.h> 
 #include <sys/types.h> 
 #include <stdbool.h>
+#include <fcntl.h>
+#include <sys/stat.h> 
+
 
 #define PORT 8080
 
@@ -35,22 +38,48 @@ unsigned char* serializeParameters(unsigned char* msg, parameters par);
 parameters deserializeParameters(unsigned char* buffer, parameters par);
 
 
-void* readThread(void* args){ 
+void* readThread(void* arg){ 
+    unsigned char buffer[1000]; 
+	management *man = ((management *) arg);
+
+	int fd;
+	char bufferFile[1000];
+	int bufferSize = man->par.to - man->par.from; // when read from keyboard check that from is smaller then to : sasy 
+
+    
+    if ((fd = open("Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
+	    perror("open error");   
+  
+    if (lseek(fd, (off_t) man->par.from, SEEK_SET) == -1)       
+	    perror("lseek error");   
+    
+	if (bufferSize != read(fd, bufferFile, bufferSize))    
+	    perror("read error"); 
+
+	bufferFile[bufferSize]='\0';	  
+	sleep(2);
+	strcpy(man->par.buffer,bufferFile); //Instead of return the struct parameters, we could return only the bufferFile 
+    serializeParameters(buffer, man->par); 
+
+  	write(man->connectfd, &buffer, sizeof(buffer)); // After two calls to the server, the function "write" doesn't work anche writes strige thinks on server :sasi (The Last) 
+    
+	close(fd);
     return NULL;
 } 
 
-void* writeThread(void* val){ 
+void* writeThread(void* arg){ 
     return NULL;
 } 
 
 void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
-    
+    unsigned char buffer[1000]; 
+
+    strcpy(man->par.buffer,"EOO"); //Impazzisce anche qua. Sicuro prima funzionava se scrivevo una stringa su client piu volte stampava al contrario non ho provato. Prima cosa provare questa cosa lato client, poi veder eperche lato serve rnon funziona sicuro non è il file "Document"
 	man->par.choice=123;
-    unsigned char buffer[100]; 
 	serializeParameters(buffer, man->par); 
-  	write(man->connectfd, &buffer, sizeof(buffer));
+  	write(man->connectfd, &buffer, sizeof(buffer));  
 
     return NULL;
 } 
@@ -68,7 +97,7 @@ void* mainThread(void* arg){
 
 	while(flag){
 		
-		unsigned char buffer[100];
+		unsigned char buffer[1000];
         if(0 == read(connectfd, &buffer, sizeof(buffer)))
 		   flag = false;
 		else{

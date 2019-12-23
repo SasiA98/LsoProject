@@ -47,28 +47,17 @@ void clientFunctions(int socketfd){
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
 		
-		par.choice=getInt();
+		par.choice=getInt(); // if I press cntr+d it goes into a loop
 
 		while(par.choice<0 || par.choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
 			par.choice=getInt();
 		}
-        par.from=12;
-        par.to=14;
-        par.dimFile=12;
-        strcpy(par.buffer,"Ciao");
-
-
-        unsigned char buffer[100]; //Controllare i tipi : sasy
-	    serializeParameters(buffer, par); 
-		write(socketfd,&buffer,sizeof(buffer));
-
+        
 		if(par.choice==0){
 			printf("Esco.\n");
-			//free(dataParameters);
-			break;
+			exit(0);
 		}
-
 
 		switch (par.choice){
 			case 1: dimension(socketfd);
@@ -82,10 +71,14 @@ void clientFunctions(int socketfd){
 }
 
 void dimension(int socketfd){
+    
+    unsigned char bufferR[1000], bufferW[1000];
 
-	unsigned char buffer[100];
-	read(socketfd, &buffer, sizeof(buffer));
-	par = deserializeParameters(buffer, par);
+    serializeParameters(bufferW, par); 
+    write(socketfd,&bufferW,sizeof(bufferW));
+
+	read(socketfd, &bufferR, sizeof(bufferR));
+	par = deserializeParameters(bufferR, par);
 
     printf("1: %d\n\n",par.choice); 
     printf("2: %d\n\n",par.from); 
@@ -95,7 +88,31 @@ void dimension(int socketfd){
 }
 
 void readFile(int socketfd){
-    printf("||Qui si legge dal file.\n");
+    
+    unsigned char bufferR[1000], bufferW[1000];
+      
+    do
+    {
+        printf("Inserisci il range da leggere\n");
+        printf("From: ");
+        par.from=getInt(); 
+        printf("To: ");
+        par.to=getInt(); 
+        
+        if(par.from > par.to)
+           printf("Errore: from dev'essere necessariamente maggiore o uguale di to\n");
+
+    } while (par.from > par.to);
+    
+    printf("%d e %d\n",par.from, par.to);
+
+    serializeParameters(bufferW, par); 
+    write(socketfd,&bufferW,sizeof(bufferW));
+
+	read(socketfd, &bufferR, sizeof(bufferR));
+	par = deserializeParameters(bufferR, par);   // How do I send a message to the client if the reading is no good?
+    
+    printf("Ecco la stringa letta dal file :%s\n",par.buffer);
 
 }
 
