@@ -9,11 +9,11 @@ int CreateSocket(){
 
     socketfd=socket(AF_INET,SOCK_STREAM,0);
     if (socketfd == -1) { 
-		perror("Socket creation failed"); 
+		perror("Socket creation failed\n"); 
 		exit(0); 
 	} 
 	else
-		printf("Socket successfully created..\n"); 
+		printf("Socket successfully created...\n"); 
 
     serveraddr.sin_family=AF_INET;
     serveraddr.sin_addr.s_addr=INADDR_ANY;
@@ -21,19 +21,19 @@ int CreateSocket(){
 
     //Bind del socket
     if ((bind(socketfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) != 0) { 
-		perror("Socket bind failed"); 
+		perror("Socket bind failed\n"); 
 		exit(0); 
 	} 
 	else
-		printf("Socket successfully binded..\n");   
+		printf("Socket successfully binded...\n");   
 
     // Now server is ready to listen and verification 
 	if ((listen(socketfd, 5)) != 0) { 
-		perror("Listen failed"); 
+		perror("Listen failed\n"); 
 		exit(0); 
 	} 
 	else
-		printf("Server listening..\n"); 
+		printf("Server listening...\n"); 
 
     return socketfd;
 }
@@ -89,7 +89,7 @@ void* readThread(void* arg){   //I thinked to make an infinit cicle to wait the 
 
 	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy 
 
-    if ((fd = open("Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
+    if ((fd = open("../file/Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
   
     if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1)
