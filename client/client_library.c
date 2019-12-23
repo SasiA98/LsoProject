@@ -37,7 +37,8 @@ void clientFunctions(int socketfd){
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
-		par->choice=getInt(); // if I press cntr+d it goes into a loop :sasi
+		par->choice=0;
+        par->choice=getInt(); // if I press cntr+d it goes into a loop :sasi
 
 		while(par->choice<0 || par->choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
