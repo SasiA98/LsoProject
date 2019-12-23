@@ -3,8 +3,6 @@
 
 int main(){
 
-	signal(SIGPIPE, SIG_IGN);
-
 	int socketfd, connectfd, lenght; 
 	struct sockaddr_in client;
 	pthread_t threadMain;	
@@ -16,20 +14,26 @@ int main(){
 	    // Accept the data packet from client and verification 
 	    connectfd = accept(socketfd, (struct sockaddr*)&client, (socklen_t*)&lenght); 
 	    if (connectfd < 0) { 
-	     	perror("server acccept failed"); 
+	     	perror("Server accept failed\n"); 
 	     	exit(0); 
 	    } 
      	else
-	     	printf("server acccept the client...\n");
+	     	printf("Server accept the client...\n");
     
         int* clientfd=(int*)malloc(sizeof(int));
     	*clientfd=connectfd;
 
-    	pthread_create(&threadMain,NULL,mainThread,clientfd);
-      	pthread_detach(threadMain);
+    	if(pthread_create(&threadMain,NULL,mainThread,clientfd)!=0){
+			perror("Thread creation failed\n");
+			exit(0);
+		}
+      	if(pthread_detach(threadMain)!=0){
+			  perror("Thread detach failed\n");
+			  exit(0);
+		}
 	
     }
-	// After chatting close the socket 
-	close(socketfd); 
-	  
+
+
+	close(socketfd);
 } 
