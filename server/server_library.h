@@ -30,6 +30,7 @@ typedef struct management{
 }management;
 
 
+int are_args_invalid(int argc, const char *argv[]);
 int CreateSocket();
 void* mainThread(void* arg);
 void* readThread(void* arg);
