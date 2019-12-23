@@ -71,7 +71,14 @@ void dimension(int socketfd, parameters *par){
 	read(socketfd, &bufferR, sizeof(bufferR));
 	par = deserializeParameters(bufferR, par);
 
-    printf("Dimensione:%d\n",par->dimFile);
+    if(par->error==0){
+        printf("Dimensione:%d\n",par->dimFile);
+    }
+    else{
+        printf("%s",par->buffer);
+        par->error=0;
+    }
+    
 }
 
 void readFile(int socketfd,parameters *par){
