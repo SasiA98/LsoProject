@@ -5,11 +5,8 @@ unsigned char * serialize_int(unsigned char *buffer, int value);
 unsigned char * serialize_char(unsigned char *buffer, char value);
 int deserialize_int(unsigned char *buffer);
 char deserialize_char(unsigned char *buffer);
-unsigned char* serializeParameters(unsigned char* msg, parameters par);
-parameters deserializeParameters(unsigned char* buffer, parameters par2);
-
-
-parameters par;
+void serializeParameters(unsigned char* msg, parameters *par);
+parameters *deserializeParameters(unsigned char* buffer, parameters *par);
 
 
 void getStr(char * str, uint len)
@@ -43,34 +40,34 @@ int getInt(){
 }
 
 void clientFunctions(int socketfd){ 
+	parameters *par =(parameters *)malloc(sizeof(parameters));
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
-		
-		par.choice=getInt(); // if I press cntr+d it goes into a loop
+		par->choice=getInt(); // if I press cntr+d it goes into a loop
 
-		while(par.choice<0 || par.choice>3){
+		while(par->choice<0 || par->choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
-			par.choice=getInt();
+			par->choice=getInt();
 		}
         
-		if(par.choice==0){
+		if(par->choice==0){
 			printf("Esco.\n");
 			exit(0);
 		}
 
-		switch (par.choice){
-			case 1: dimension(socketfd);
+		switch (par->choice){
+			case 1: dimension(socketfd,par);
 			break;
-			case 2: readFile(socketfd);
+			case 2: readFile(socketfd,par);
 			break;
-			case 3: writeFile(socketfd);
+			case 3: writeFile(socketfd,par);
 			break;
 		}
 	}
 }
 
-void dimension(int socketfd){
+void dimension(int socketfd, parameters *par){
     
     unsigned char bufferR[1000], bufferW[1000];
 
@@ -80,14 +77,14 @@ void dimension(int socketfd){
 	read(socketfd, &bufferR, sizeof(bufferR));
 	par = deserializeParameters(bufferR, par);
 
-    printf("1: %d\n\n",par.choice); 
-    printf("2: %d\n\n",par.from); 
-    printf("3: %d\n\n",par.to); 
-    printf("4: %s\n\n",par.buffer); 
+    printf("1: %d\n\n",par->choice); 
+    printf("2: %d\n\n",par->from); 
+    printf("3: %d\n\n",par->to); 
+    printf("4: %s\n\n",par->buffer); 
 
 }
 
-void readFile(int socketfd){
+void readFile(int socketfd,parameters *par){
     
     unsigned char bufferR[1000], bufferW[1000];
       
@@ -95,16 +92,16 @@ void readFile(int socketfd){
     {
         printf("Inserisci il range da leggere\n");
         printf("From: ");
-        par.from=getInt(); 
+        par->from=getInt(); 
         printf("To: ");
-        par.to=getInt(); 
+        par->to=getInt(); 
         
-        if(par.from > par.to)
+        if(par->from > par->to)
            printf("Errore: from dev'essere necessariamente maggiore o uguale di to\n");
 
-    } while (par.from > par.to);
+    } while (par->from > par->to);
     
-    printf("%d e %d\n",par.from, par.to);
+    printf("%d e %d\n",par->from, par->to);
 
     serializeParameters(bufferW, par); 
     write(socketfd,&bufferW,sizeof(bufferW));
@@ -112,14 +109,14 @@ void readFile(int socketfd){
 	read(socketfd, &bufferR, sizeof(bufferR));
 	par = deserializeParameters(bufferR, par);   // How do I send a message to the client if the reading is no good?
     
-    printf("Ecco la stringa letta dal file :%s\n",par.buffer);
+    printf("Ecco la stringa letta dal file :%s\n",par->buffer); 
 
 }
 
-void writeFile(int socketfd){
+void writeFile(int socketfd, parameters *par){
     printf("Qui si scrive sul file.\n");
-
 }
+
 
 
 
@@ -165,41 +162,39 @@ char deserialize_char(unsigned char *buffer)
 }
 
 
-unsigned char* serializeParameters(unsigned char* buffer, parameters par)
-{
-    buffer = serialize_int(buffer,par.choice);
-    buffer = serialize_int(buffer,par.from);   
-	buffer = serialize_int(buffer,par.to);
-    buffer = serialize_int(buffer,par.dimFile);
 
-	for(int i=0; i<strlen(par.buffer)+1; i++)
-        buffer = serialize_char(buffer,par.buffer[i]);  
-       
-    return buffer;
+void serializeParameters(unsigned char* buffer, parameters *par)
+{
+	
+    buffer = serialize_int(buffer,par->choice);
+    buffer = serialize_int(buffer,par->from);   
+	buffer = serialize_int(buffer,par->to);
+    buffer = serialize_int(buffer,par->dimFile);
+
+	for(int i=0; i<strlen(par->buffer)+1; i++)
+        buffer = serialize_char(buffer,par->buffer[i]);  
 }
 
 
-parameters deserializeParameters(unsigned char* buffer, parameters par)
+
+parameters * deserializeParameters(unsigned char* buffer, parameters *par)
 {
-    par.choice = deserialize_int(buffer);
-    par.from = deserialize_int(buffer+4);
-    par.to = deserialize_int(buffer+8);
-    par.dimFile = deserialize_int(buffer+12);    
+    par->choice = deserialize_int(buffer);
+    par->from = deserialize_int(buffer+4);
+    par->to = deserialize_int(buffer+8);
+    par->dimFile = deserialize_int(buffer+12);    
   
     int i=0;
     int j=16;
     
     do
     {
-        par.buffer[i] = deserialize_char((buffer+j));
+        par->buffer[i] = deserialize_char((buffer+j));
         i++;
         j++;
-    }while(par.buffer[i-1]!='\0'); 
+    }while(par->buffer[i-1]!='\0'); 
     
     j++; 
     
     return par;
 }
-
-
-

@@ -15,7 +15,13 @@
 
 #define PORT 8080
 
-typedef struct {
+
+struct mutex {
+
+} mutex;
+
+
+typedef struct parameters{
 	int choice;
     int from;
     int to;
@@ -25,8 +31,9 @@ typedef struct {
 
 
 typedef struct management{
+
     int connectfd;
-    parameters par;
+    parameters *par;
 }management;
  
 
@@ -34,31 +41,32 @@ unsigned char * serialize_int(unsigned char *buffer, int value);
 unsigned char * serialize_char(unsigned char *buffer, char value);
 int deserialize_int(unsigned char *buffer);
 char deserialize_char(unsigned char *buffer);
-unsigned char* serializeParameters(unsigned char* msg, parameters par);
-parameters deserializeParameters(unsigned char* buffer, parameters par);
+void serializeParameters(unsigned char* msg, parameters *par);
+parameters *deserializeParameters(unsigned char* buffer, parameters *par);
 
 
 void* readThread(void* arg){ 
-    unsigned char buffer[1000]; 
 	management *man = ((management *) arg);
 
 	int fd;
 	char bufferFile[1000];
-	int bufferSize = man->par.to - man->par.from; // when read from keyboard check that from is smaller then to : sasy 
+	unsigned char buffer[1000]; 
+
+	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy 
 
     
     if ((fd = open("Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
   
-    if (lseek(fd, (off_t) man->par.from, SEEK_SET) == -1)       
+    if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
 	    perror("lseek error");   
     
 	if (bufferSize != read(fd, bufferFile, bufferSize))    
 	    perror("read error"); 
 
 	bufferFile[bufferSize]='\0';	  
-	sleep(2);
-	strcpy(man->par.buffer,bufferFile); //Instead of return the struct parameters, we could return only the bufferFile 
+	sleep(10);
+	strcpy(man->par->buffer,bufferFile); //Instead of return the struct parameters, we could return only the bufferFile 
     serializeParameters(buffer, man->par); 
 
   	write(man->connectfd, &buffer, sizeof(buffer)); // After two calls to the server, the function "write" doesn't work anche writes strige thinks on server :sasi (The Last) 
@@ -76,8 +84,8 @@ void* dimThread(void* arg){
 	management *man = ((management *) arg);
     unsigned char buffer[1000]; 
 
-    strcpy(man->par.buffer,"EOO"); //Impazzisce anche qua. Sicuro prima funzionava se scrivevo una stringa su client piu volte stampava al contrario non ho provato. Prima cosa provare questa cosa lato client, poi veder eperche lato serve rnon funziona sicuro non è il file "Document"
-	man->par.choice=123;
+    strcpy(man->par->buffer,"EOO");
+	man->par->choice=123;
 	serializeParameters(buffer, man->par); 
   	write(man->connectfd, &buffer, sizeof(buffer));  
 
@@ -87,13 +95,14 @@ void* dimThread(void* arg){
 void* mainThread(void* arg){
 
     bool flag = true;
-	int connectfd = *((int *)arg);
 
-	pthread_t threadDim, threadRead, threadWrite;
-
+    parameters *par = (parameters *)malloc(sizeof(parameters));
 	management *man = (management *)malloc(sizeof(management));
+
+    pthread_t threadDim, threadRead, threadWrite;
+	int connectfd = *((int *)arg);
+	
 	man->connectfd = connectfd;
-    parameters par;
 
 	while(flag){
 		
@@ -104,24 +113,26 @@ void* mainThread(void* arg){
 		   par = deserializeParameters(buffer, par);
 	       man->par = par;
 
-           printf("The choice is: %d\n", par.choice);
+           printf("The choice is: %d\n", par->choice);
 
-        	if(par.choice==1){
+        	if(par->choice==1){
 	    		pthread_create(&threadDim,NULL,dimThread,man);
 		    	pthread_join(threadDim,NULL);
  	 	    }  
-     	    if(par.choice==2){
+     	    if(par->choice==2){
             	pthread_create(&threadRead,NULL,readThread,man);
 		     	pthread_join(threadRead,NULL);
 		    } 
-		    if(par.choice==3){
+		    if(par->choice==3){
              	pthread_create(&threadWrite,NULL,writeThread,man);
 		    	pthread_join(threadWrite,NULL);
 	    	}
 		}
-		free(man);
-		free(arg);
 	}
+	free(man);
+	free(arg);
+	free(par);
+	
 	return NULL;
 }
 
@@ -196,10 +207,6 @@ int main(){
 
 
 
-
-
-
-
 unsigned char * serialize_int(unsigned char *buffer, int value)
 {
     buffer[0] = value >> 24;
@@ -234,76 +241,37 @@ char deserialize_char(unsigned char *buffer)
 
 
 
-unsigned char* serializeParameters(unsigned char* buffer, parameters par)
+void serializeParameters(unsigned char* buffer, parameters *par)
 {
-    buffer = serialize_int(buffer,par.choice);
-    buffer = serialize_int(buffer,par.from);   
-	buffer = serialize_int(buffer,par.to);
-    buffer = serialize_int(buffer,par.dimFile);
+	
+    buffer = serialize_int(buffer,par->choice);
+    buffer = serialize_int(buffer,par->from);   
+	buffer = serialize_int(buffer,par->to);
+    buffer = serialize_int(buffer,par->dimFile);
 
-	for(int i=0; i<strlen(par.buffer)+1; i++)
-        buffer = serialize_char(buffer,par.buffer[i]);  
-       
-    return buffer;
+	for(int i=0; i<strlen(par->buffer)+1; i++)
+        buffer = serialize_char(buffer,par->buffer[i]);  
 }
 
 
-parameters deserializeParameters(unsigned char* buffer, parameters par)
+parameters * deserializeParameters(unsigned char* buffer, parameters *par)
 {
-    par.choice = deserialize_int(buffer);
-    par.from = deserialize_int(buffer+4);
-    par.to = deserialize_int(buffer+8);
-    par.dimFile = deserialize_int(buffer+12);    
+    par->choice = deserialize_int(buffer);
+    par->from = deserialize_int(buffer+4);
+    par->to = deserialize_int(buffer+8);
+    par->dimFile = deserialize_int(buffer+12);    
   
     int i=0;
     int j=16;
     
     do
     {
-        par.buffer[i] = deserialize_char((buffer+j));
+        par->buffer[i] = deserialize_char((buffer+j));
         i++;
         j++;
-    }while(par.buffer[i-1]!='\0'); 
+    }while(par->buffer[i-1]!='\0'); 
     
     j++; 
     
     return par;
 }
-
-
-
-
-
-/*
-// Function designed for chat between client and server. 
-void* WriteThread(void* val){ 
-	
-	int sockfd=(*(int*)val);
-    parameters* par=(parameters*)malloc(sizeof(parameters));
-	// infinite loop for chat 
-	for (;;) {
-
-		// read the message from client and copy it in buffer 
-		recv(sockfd, par, sizeof(par),0); 
-		// print buffer which contains the client contents 
-		printf("From client: %d\n", par->choice);
-		// copy server message in the buffer
-        int a=peppe->num;
-		peppe->num=a*a;
-		
-		printf("From server: %d\n", peppe->num);
-		// and send that buffer to client 
-		send(sockfd, peppe, sizeof(peppe),0); 
-
-		// if msg contains "Exit" then server exit and chat ended. 
-		if(!peppe->num){
-			free(val);
-			free(peppe);
-			break;
-		}
-		
-	} 
-	
-	return NULL;
-} 
-*/
