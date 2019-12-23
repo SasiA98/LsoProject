@@ -14,8 +14,6 @@
 #include <sys/stat.h> 
 #include "../protocol/protocol.h"
 
-#define PORT 8080
-
 
 
 struct mutex {
