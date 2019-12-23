@@ -1,6 +1,39 @@
 #include "server_library.h"
 
+int dimension;
+int port;
+char nameFile[50];
 
+int are_args_invalid(int argc, const char *argv[]){
+    if (argc!=4) {
+        return 1;
+    }
+
+    // First argument must be positive (and other conditions to implements): genny
+    char *p = NULL;
+    int a = (int) strtol(argv[1], &p, 10);
+    if (p == NULL || *p != '\0'|| a<0 || a>65535) 
+        return 4;
+
+    // Second argument must exist
+    int fd = open(argv[2], O_WRONLY);
+    if (fd<0) {
+        return 3;
+    }
+    close(fd);
+
+
+    // Third argument must be positive (and other conditions to implements): genny
+    int b = (int) strtol(argv[3], &p, 10);
+    if (p == NULL || *p != '\0'|| b<0) 
+        return 4;
+
+    port=a;
+    strcpy(nameFile,argv[2]);
+    dimension=b;
+
+    return 0;
+}
 
 int CreateSocket(){
 
@@ -116,7 +149,9 @@ void* readThread(void* arg){   //I thinked to make an infinit cicle to wait the 
     return NULL;
 }
    
-void* writeThread(void* arg){ 
+void* writeThread(void* arg){
+
+
     return NULL;
 } 
 
@@ -125,10 +160,27 @@ void* dimThread(void* arg){
 	management *man = ((management *) arg);
     unsigned char buffer[1000]; 
 
-    strcpy(man->par->buffer,"EOO");
-	man->par->dimFile=123;
+    int fd, dim=0;
+
+    if ((fd = open("../file/Document.txt", O_RDONLY)) == -1){ //Does it need any permission? : sasy    
+	    perror("open error");
+        man->par->error=1;
+        strcpy(man->par->buffer,"errore accesso file\n");
+    }
+
+    if ((dim=lseek(fd, 0, SEEK_END)) == -1){
+        perror("cannot seek\n");
+        man->par->error=1;
+    }
+    else{
+        man->par->dimFile=dim;
+    }
+    
+	
 	serializeParameters(buffer, man->par); 
-  	write(man->connectfd, &buffer, sizeof(buffer));  
+  	write(man->connectfd, &buffer, sizeof(buffer)); 
+
+    close(fd); 
 
     return NULL;
 } 
