@@ -123,7 +123,7 @@ void* writeThread(void* arg){
 	    perror("open error");   
 
 
-    if(dimention < (man->par->from + strlen(man->par->buffer))){
+    if(dimension < (man->par->from + strlen(man->par->buffer))){
 	    strcpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0");
 		man->par->error = 1;  
 	}else{
