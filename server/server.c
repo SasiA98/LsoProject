@@ -30,5 +30,6 @@ int main(){
 	
     }
 	// After chatting close the socket 
-	close(socketfd);   
+	close(socketfd); 
+	  
 } 
