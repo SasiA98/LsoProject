@@ -7,12 +7,12 @@
 
 
 typedef struct parameters{
-    bool error;	
+    int error;	
 	int choice;
     int from;
     int to;
     int dimFile;
-    char buffer[100];
+    char buffer[200];
 }parameters;
 
 unsigned char * serialize_int(unsigned char *buffer, int value);

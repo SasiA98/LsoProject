@@ -113,14 +113,44 @@ void* mainThread(void* arg){
 	return NULL;
 }
 
-void* readThread(void* arg){   //I thinked to make an infinit cicle to wait the correct input of the client, but if the client dies, the server remains in loop and the management of mutex is more difficult : sasi
+void* writeThread(void* arg){   
 	management *man = ((management *) arg);
+
+	int fd, bufferSize;
+	unsigned char buffer[1000];
+
+    if ((fd = open("../file/Document.txt", O_WRONLY)) == -1) //Does it need any permission? : sasy    
+	    perror("open error");   
+
+
+    if(dimention < (man->par->from + strlen(man->par->buffer))){
+	    strcpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0");
+		man->par->error = 1;  
+	}else{
+		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
+	        perror("lseek error");   
+
+        bufferSize = strlen(man->par->buffer);
+		if (bufferSize != write(fd, man->par->buffer, bufferSize))    
+	        perror("write error"); 
+	
+	    strcpy(man->par->buffer,"OK\0"); 
+	}
+    serializeParameters(buffer, man->par); 
+    write(man->connectfd, &buffer, sizeof(buffer)); 
+    
+	close(fd);
+    return NULL;
+}
+   
+void* readThread(void* arg){ 
+   	management *man = ((management *) arg);
 
 	int fd, offset;
 	char bufferFile[1000];
 	unsigned char buffer[1000];
 
-	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy 
+	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy OK
 
     if ((fd = open("../file/Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
@@ -128,10 +158,14 @@ void* readThread(void* arg){   //I thinked to make an infinit cicle to wait the 
     if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1)
 	     perror("lseek error");      
 	
-	if(offset < man->par->to){ 		 //We could shift lseek directly in 'to' position and check if it gives a error.    
-	   strcpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0");
-	   man->par->error = true;
+	if(offset == 0){
+	   strcpy(man->par->buffer,"ERRORE: Il File è vuoto\0");
+	   man->par->error = 2;
 
+	}else if(offset < man->par->to){ 	  
+	   strcpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0");
+	   man->par->error = 1;
+	   
 	}else{
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
 	    perror("lseek error");   
@@ -146,12 +180,6 @@ void* readThread(void* arg){   //I thinked to make an infinit cicle to wait the 
     write(man->connectfd, &buffer, sizeof(buffer)); 
     
 	close(fd);
-    return NULL;
-}
-   
-void* writeThread(void* arg){
-
-
     return NULL;
 } 
 
