@@ -17,7 +17,6 @@
 typedef unsigned int uint;
 
 
-
 void getStr(char * str, uint len);
 int getInt();
 void clientFunctions(int sockfd);
