@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+
 typedef struct parameters{
     bool error;	
 	int choice;
