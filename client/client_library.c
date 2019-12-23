@@ -74,12 +74,47 @@ void dimension(int socketfd, parameters *par){
     printf("Dimensione:%d\n",par->dimFile);
 }
 
-void readFile(int socketfd,parameters *par){
+void writeFile(int socketfd,parameters *par){
     
     unsigned char bufferR[1000], bufferW[1000]; //Does it need clear the buffer when the client do a new request?
     do 
     {
-        par->error = false; 
+        par->error = 0; 
+        do
+        {
+            printf("Inserisci l'indice da cui partire\n");
+            printf("From: ");
+            par->from=getInt(); 
+            printf("Inserisci stringa da scrivere: ");
+            getStr(par->buffer,200); 
+        
+            if(par->from < 0) 
+               printf("Errore: from dev'essere necessariamente maggiore o uguale di 0\n");
+
+        } while (par->from <0); 
+    
+        serializeParameters(bufferW, par); 
+        write(socketfd,&bufferW,sizeof(bufferW));
+
+    	read(socketfd, &bufferR, sizeof(bufferR));
+    	par = deserializeParameters(bufferR, par);  
+       
+        if(par->error != 0){
+            printf("%s\n",par->buffer);
+        }
+        else   
+           printf("La stringa e' stata inserita correttamente\n"); 
+
+    } while (par->error != 0);
+}
+
+void readFile(int socketfd, parameters *par){
+    
+    bool flag = false;
+    unsigned char bufferR[1000], bufferW[1000]; //Does it need clear the buffer when the client do a new request?
+    do 
+    {
+        par->error = 0; 
         do
         {
             printf("Inserisci il range da leggere\n");
@@ -91,24 +126,21 @@ void readFile(int socketfd,parameters *par){
             if(par->from > par->to || par->from < 0) 
                printf("Errore: from dev'essere necessariamente maggiore o uguale di to e maggiore di 0\n");
 
-        } while (par->from > par->to || par->from <0); //Check the conditions : sasi 
+        } while (par->from > par->to || par->from <0); 
     
         serializeParameters(bufferW, par); 
         write(socketfd,&bufferW,sizeof(bufferW));
 
     	read(socketfd, &bufferR, sizeof(bufferR));
-    	par = deserializeParameters(bufferR, par);  // How do I send a message to the client if the reading is no good? :sasi
+    	par = deserializeParameters(bufferR, par);  
        
-        if(par->error == true)
-           printf("%s\n",par->buffer);
+        if(par->error != 0){
+            printf("%s\n",par->buffer);
+            if(par->error == 2)
+                flag = false;
+        }
         else   
            printf("Ecco la stringa letta dal file :%s\n",par->buffer); 
 
-    } while (par->error == true);
-    
-
-}
-
-void writeFile(int socketfd, parameters *par){
-    printf("Qui si scrive sul file.\n");
+    } while (par->error != 0 && flag == true);
 }
