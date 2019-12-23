@@ -1,7 +1,15 @@
 #include "server_library.h"
 
 
-int main(){
+int main(int argc, const char** argv){
+
+	int err;
+	if ((err=are_args_invalid(argc, argv))) {
+    	printf("Usage: %s <TCP port> <Name File> <Max Dimension>\n", argv[0]);
+    	return err;
+  	}
+
+
 
 	int socketfd, connectfd, lenght; 
 	struct sockaddr_in client;
