@@ -16,7 +16,12 @@ int main(int argc, const char** argv){
 	pthread_t threadMain;	
 
     socketfd = CreateSocket();
-	lenght = sizeof(client); 
+	lenght = sizeof(client);
+
+	if(pthread_mutex_init(&mutex,NULL)){
+		perror("Mutex init\n");
+		exit(0);
+	}
 
     while(1){
 	    // Accept the data packet from client and verification 
@@ -42,6 +47,9 @@ int main(int argc, const char** argv){
 	
     }
 
+	if(pthread_mutex_destroy(&mutex)){
+		perror("Mutex destroy\n");
+	}
 
 	close(socketfd);
 } 
