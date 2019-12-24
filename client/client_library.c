@@ -23,8 +23,7 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
     return 0;
 }
 
-void getStr(char * str, uint len)
-{
+void getStr(char * str, uint len){
   assert(str != NULL);
   uint i;
   char c;
@@ -114,7 +113,7 @@ void writeFile(int socketfd,parameters *par){
             printf("From: ");
             par->from=getInt(); 
             printf("Inserisci stringa da scrivere: ");
-            getStr(par->buffer,200); 
+            getStr(par->buffer,DIM_BUFFER-1); 
         
             if(par->from < 0) 
                printf("Errore: from dev'essere necessariamente maggiore o uguale di 0\n");
@@ -168,7 +167,7 @@ void readFile(int socketfd, parameters *par){
                 flag = false;
         }
         else   
-           printf("Ecco la stringa letta dal file :%s\n",par->buffer); 
+           printf("Ecco la stringa letta dal file :\n%s\n\n",par->buffer); 
 
     } while (par->error != 0 && flag == true);
 }
