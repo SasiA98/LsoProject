@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#define DIM_BUFFER 500
 
 typedef struct parameters{
     int error;	
@@ -12,7 +13,7 @@ typedef struct parameters{
     int from;
     int to;
     int dimFile;
-    char buffer[200];
+    char buffer[DIM_BUFFER];
 }parameters;
 
 unsigned char * serialize_int(unsigned char *buffer, int value);
