@@ -129,7 +129,7 @@ void* writeThread(void* arg){
 	pthread_mutex_lock(&mutex);
 
     if(dimension < (man->par->from + strlen(man->par->buffer))){
-	    strcpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0");
+	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER-1);
 		man->par->error = 1;  
 	}else{
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
@@ -139,7 +139,7 @@ void* writeThread(void* arg){
 		if (bufferSize != write(fd, man->par->buffer, bufferSize))    
 	        perror("write error"); 
 	
-	    strcpy(man->par->buffer,"OK\0"); 
+	    strncpy(man->par->buffer,"OK\0",DIM_BUFFER-1); //Valore non letto dal client.
 	}
 
 	pthread_mutex_unlock(&mutex);
@@ -164,14 +164,18 @@ void* readThread(void* arg){
 	    perror("open error");   
   
     if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1)
-	     perror("lseek error");      
-	
-	if(offset == 0){
-	   strcpy(man->par->buffer,"ERRORE: Il File è vuoto\0");
+	     perror("lseek error");
+
+	if(bufferSize >= DIM_BUFFER){
+	   strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER-1);
+	   man->par->error = 3;
+
+	}else if(offset == 0){
+	   strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER-1);
 	   man->par->error = 2;
 
 	}else if(offset < man->par->to){ 	  
-	   strcpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0");
+	   strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER-1);
 	   man->par->error = 1;
 	   
 	}else{
@@ -186,7 +190,7 @@ void* readThread(void* arg){
 		pthread_mutex_unlock(&mutex);
 
 	    bufferFile[bufferSize]='\0';	 
-		strcpy(man->par->buffer,bufferFile); // Segmantation fault, se bufferSize é maggiore della grandezza di buffer (200 caratteri) : Genny
+		strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1); // Probabile segmantation fault usare strncpy al posto di strcpy : Genny
 	}
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
@@ -205,7 +209,7 @@ void* dimThread(void* arg){
     if ((fd = open(nameFile, O_RDONLY)) == -1){ //Does it need any permission? : sasy    
 	    perror("open error");
         man->par->error=1;
-        strcpy(man->par->buffer,"errore accesso file\n");
+        strncpy(man->par->buffer,"errore accesso file\n",DIM_BUFFER-1);
     }
 
 	pthread_mutex_lock(&mutex);
