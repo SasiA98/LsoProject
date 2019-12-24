@@ -1,6 +1,27 @@
 #include "client_library.h"
 
+int checkArgsInvalidClient(int argc, const char *argv[]){
+    if (argc!=3) {
+        return 1;
+    }
 
+
+    // Second argument must be positive (and other conditions to implements): genny
+    char *p = NULL;
+    int a = (int) strtol(argv[2], &p, 10);
+    if (p == NULL || *p != '\0'|| a<0 || a>65535) 
+        return 4;
+
+    // First argument
+    if (strlen(argv[1])>=19) {
+        return 3;
+    }
+
+    strncpy(IP_PORT,argv[1],19);
+    PORT=a;
+
+    return 0;
+}
 
 void getStr(char * str, uint len)
 {
