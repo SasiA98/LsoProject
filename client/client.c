@@ -2,9 +2,13 @@
 
 
 
-int main(int argc, const char ** argv){ 
-    
-	signal(SIGPIPE, SIG_IGN);
+int main(int argc, const char ** argv){
+
+	int err;
+	if ((err=checkArgsInvalidClient(argc, argv))) {
+    	printf("Usage: %s <IP address> <TCP port>\n", argv[0]);
+    	return err;
+  	}
 
 	int socketfd; 
 	struct sockaddr_in servaddr; 
@@ -32,8 +36,7 @@ int main(int argc, const char ** argv){
 	}
 	else
 		printf("Connected to the server..\n"); 
-
-	// function for chat 
+ 
 	clientFunctions(socketfd); 
 
 	// close the socket 
