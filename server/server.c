@@ -4,7 +4,7 @@
 int main(int argc, const char** argv){
 
 	int err;
-	if ((err=are_args_invalid(argc, argv))) {
+	if ((err=checkArgsInvalidServer(argc, argv))) {
     	printf("Usage: %s <TCP port> <Name File> <Max Dimension>\n", argv[0]);
     	return err;
   	}
