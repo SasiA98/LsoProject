@@ -2,9 +2,9 @@
 
 int dimension;
 int PORT;
-char nameFile[50];
+char nameFile[MAX_DIM_NAME_FILE];
 
-int are_args_invalid(int argc, const char *argv[]){
+int checkArgsInvalidServer(int argc, const char *argv[]){
     if (argc!=4) {
         return 1;
     }
@@ -17,19 +17,23 @@ int are_args_invalid(int argc, const char *argv[]){
 
     // Second argument must exist
     int fd = open(argv[2], O_WRONLY);
-    if (fd<0) {
+    if (fd<0 || strlen(argv[2])>=MAX_DIM_NAME_FILE-1) {
         return 3;
+    }
+	int dim;
+	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
+        perror("cannot seek\n");
     }
     close(fd);
 
 
     // Third argument must be positive (and other conditions to implements): genny
     int b = (int) strtol(argv[3], &p, 10);
-    if (p == NULL || *p != '\0'|| b<0) 
+    if (p == NULL || *p != '\0'|| b<dim) 
         return 4;
 
     PORT=a;
-    strcpy(nameFile,argv[2]);
+    strncpy(nameFile,argv[2],MAX_DIM_NAME_FILE-1);
     dimension=b;
 
     return 0;
@@ -119,7 +123,7 @@ void* writeThread(void* arg){
 	int fd, bufferSize;
 	unsigned char buffer[1000];
 
-    if ((fd = open("../file/Document.txt", O_WRONLY)) == -1) //Does it need any permission? : sasy    
+    if ((fd = open(nameFile, O_WRONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
 
 
@@ -152,7 +156,7 @@ void* readThread(void* arg){
 
 	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy OK
 
-    if ((fd = open("../file/Document.txt", O_RDONLY)) == -1) //Does it need any permission? : sasy    
+    if ((fd = open(nameFile, O_RDONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
   
     if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1)
@@ -190,7 +194,7 @@ void* dimThread(void* arg){
 
     int fd, dim=0;
 
-    if ((fd = open("../file/Document.txt", O_RDONLY)) == -1){ //Does it need any permission? : sasy    
+    if ((fd = open(nameFile, O_RDONLY)) == -1){ //Does it need any permission? : sasy    
 	    perror("open error");
         man->par->error=1;
         strcpy(man->par->buffer,"errore accesso file\n");
