@@ -126,6 +126,7 @@ void* writeThread(void* arg){
     if ((fd = open(nameFile, O_WRONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
 
+	pthread_mutex_lock(&mutex);
 
     if(dimension < (man->par->from + strlen(man->par->buffer))){
 	    strcpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0");
@@ -140,6 +141,9 @@ void* writeThread(void* arg){
 	
 	    strcpy(man->par->buffer,"OK\0"); 
 	}
+
+	pthread_mutex_unlock(&mutex);
+
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
     
@@ -174,11 +178,15 @@ void* readThread(void* arg){
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
 	    perror("lseek error");   
 	
+		pthread_mutex_lock(&mutex);
+
 		if (bufferSize != read(fd, bufferFile, bufferSize))    
-	        perror("read error"); 
+	        perror("read error");
+
+		pthread_mutex_unlock(&mutex);
 
 	    bufferFile[bufferSize]='\0';	 
-		strcpy(man->par->buffer,bufferFile); 
+		strcpy(man->par->buffer,bufferFile); // Segmantation fault, se bufferSize é maggiore della grandezza di buffer (200 caratteri) : Genny
 	}
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
@@ -200,6 +208,8 @@ void* dimThread(void* arg){
         strcpy(man->par->buffer,"errore accesso file\n");
     }
 
+	pthread_mutex_lock(&mutex);
+
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
         perror("cannot seek\n");
         man->par->error=1;
@@ -207,6 +217,8 @@ void* dimThread(void* arg){
     else{
         man->par->dimFile=dim;
     }
+
+	pthread_mutex_unlock(&mutex);
     
 	
 	serializeParameters(buffer, man->par); 
