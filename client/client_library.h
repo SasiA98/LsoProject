@@ -11,12 +11,15 @@
 #include <arpa/inet.h>
 #include "../protocol/protocol.h"
 
-#define PORT 8080
-#define IP_PORT "127.0.0.1"
+//#define PORT 8080
+//#define IP_PORT "127.0.0.1"
+
+int PORT;
+char IP_PORT[20];
 
 typedef unsigned int uint;
 
-
+int checkArgsInvalidClient(int argc, const char *argv[]);
 void getStr(char * str, uint len);
 int getInt();
 void clientFunctions(int sockfd);
