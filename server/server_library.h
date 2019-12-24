@@ -16,9 +16,7 @@
 
 #define MAX_DIM_NAME_FILE 50
 
-struct mutex {
-
-} mutex;
+pthread_mutex_t mutex;
 
 
 typedef struct management{
