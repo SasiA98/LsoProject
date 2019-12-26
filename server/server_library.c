@@ -132,7 +132,7 @@ void* writeThread(void* arg){
     if ((fd = open(nameFile, O_WRONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
 
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&(syncro->mutexWrite));
 
     if(dimension < (man->par->from + strlen(man->par->buffer))){
 	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER-1);
@@ -148,7 +148,7 @@ void* writeThread(void* arg){
 	    strncpy(man->par->buffer,"OK\0",DIM_BUFFER-1); //Valore non letto dal client.
 	}
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_unlock(&(syncro->mutexWrite));
 
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
@@ -186,14 +186,24 @@ void* readThread(void* arg){
 	   
 	}else{
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-	    perror("lseek error");   
-	
-		pthread_mutex_lock(&mutex);
+	    perror("lseek error");
+
+
+		pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader++;
+		if ((syncro->numReader)==1) pthread_mutex_lock(&(syncro->mutexWrite));
+		pthread_mutex_unlock(&(syncro->mutexRead));
+
 
 		if (bufferSize != read(fd, bufferFile, bufferSize))    
 	        perror("read error");
 
-		pthread_mutex_unlock(&mutex);
+
+		pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader--;
+		if ((syncro->numReader)==0) pthread_mutex_unlock(&(syncro->mutexWrite));
+		pthread_mutex_unlock(&(syncro->mutexRead));
+
 
 	    bufferFile[bufferSize]='\0';	 
 		strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1); // Probabile segmantation fault usare strncpy al posto di strcpy : Genny
@@ -218,7 +228,10 @@ void* dimThread(void* arg){
         strncpy(man->par->buffer,"errore accesso file\n",DIM_BUFFER-1);
     }
 
-	pthread_mutex_lock(&mutex);
+	pthread_mutex_lock(&(syncro->mutexRead));
+	syncro->numReader++;
+	if ((syncro->numReader)==1) pthread_mutex_lock(&(syncro->mutexWrite));
+	pthread_mutex_unlock(&(syncro->mutexRead));
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
         perror("cannot seek\n");
@@ -228,7 +241,10 @@ void* dimThread(void* arg){
         man->par->dimFile=dim;
     }
 
-	pthread_mutex_unlock(&mutex);
+	pthread_mutex_lock(&(syncro->mutexRead));
+	syncro->numReader--;
+	if ((syncro->numReader)==0) pthread_mutex_unlock(&(syncro->mutexWrite));
+	pthread_mutex_unlock(&(syncro->mutexRead));
     
 	
 	serializeParameters(buffer, man->par); 
