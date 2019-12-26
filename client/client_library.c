@@ -83,7 +83,7 @@ void clientFunctions(int socketfd){
 
 void dimension(int socketfd, parameters *par){
     
-    unsigned char bufferR[1000], bufferW[1000];
+    unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS];
 
     serializeParameters(bufferW, par); 
     write(socketfd,&bufferW,sizeof(bufferW));
@@ -103,7 +103,7 @@ void dimension(int socketfd, parameters *par){
 
 void writeFile(int socketfd,parameters *par){
     
-    unsigned char bufferR[1000], bufferW[1000]; //Does it need clear the buffer when the client do a new request?
+    unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS]; //Does it need clear the buffer when the client do a new request?
     do 
     {
         par->error = 0; 
@@ -138,7 +138,7 @@ void writeFile(int socketfd,parameters *par){
 void readFile(int socketfd, parameters *par){
     
     bool flag = false;
-    unsigned char bufferR[1000], bufferW[1000]; //Does it need clear the buffer when the client do a new request?
+    unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS]; //Does it need clear the buffer when the client do a new request?
     do 
     {
         par->error = 0; 
