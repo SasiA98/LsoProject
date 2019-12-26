@@ -121,7 +121,7 @@ void* writeThread(void* arg){
 	management *man = ((management *) arg);
 
 	int fd, bufferSize;
-	unsigned char buffer[1000];
+	unsigned char buffer[DIM_PARAMETERS];
 
     if ((fd = open(nameFile, O_WRONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
@@ -155,8 +155,8 @@ void* readThread(void* arg){
    	management *man = ((management *) arg);
 
 	int fd, offset;
-	char bufferFile[1000];
-	unsigned char buffer[1000];
+	char bufferFile[DIM_PARAMETERS];
+	unsigned char buffer[DIM_PARAMETERS];
 
 	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy OK
 
@@ -202,7 +202,7 @@ void* readThread(void* arg){
 void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
-    unsigned char buffer[1000]; 
+    unsigned char buffer[DIM_PARAMETERS]; 
 
     int fd, dim=0;
 
