@@ -48,5 +48,7 @@ int main(int argc, const char ** argv){
 
 	// close the socket 
 	close(socketfd); 
+
+	return 0;
 } 
 
