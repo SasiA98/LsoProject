@@ -32,7 +32,6 @@ int main(int argc, const char ** argv){
 
 	// assign IP, PORT 
 	servaddr.sin_family = AF_INET; 
-	//inet_aton("127.0.0.1", &servaddr.sin_addr);
 	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
 	servaddr.sin_port = htons(PORT);
 
