@@ -1,6 +1,5 @@
 #include "server_library.h"
 
-
 int main(int argc, const char** argv){
 
 //---------DA CANCELLARE-----------
@@ -13,7 +12,26 @@ int main(int argc, const char** argv){
 
 	int err;
 	if ((err=checkArgsInvalidServer(argc, argv))) {
-    	printf("Usage: %s <TCP port> <Name File> <Max Dimension>\n", argv[0]);
+		switch(err){
+			case 1: fprintf(stderr,"Usage: %s <TCP port> <Name File> <Max Dimension>\n", argv[0]);
+				break;
+			case 2: fprintf(stderr,"Porta TCP fuori dal range!\n");
+				break;
+			case 3: fprintf(stderr,"Path del file troppo grande!\n");
+				break;
+			case 4: fprintf(stderr,"Il file %s non esiste!\n",argv[2]);
+				break;
+			case 5: fprintf(stderr,"Non si hanno i diritti di lettura per il file!\n");
+				break;
+			case 6: fprintf(stderr,"Non si hanno i diritti di scrittura per il file!\n");
+				break;
+			case 7: fprintf(stderr,"Apertura del file fallita!\n");
+				break;
+			case 8: fprintf(stderr,"La dimensione deve essere un valore positivo\n");
+				break;
+			case 9: fprintf(stderr,"Dimensione massima inserita inferiore a quella reale\n");
+				break;
+		}
     	return err;
   	}
 
@@ -60,4 +78,6 @@ int main(int argc, const char** argv){
 	}
 
 	close(socketfd);
+
+	return 0;
 } 
