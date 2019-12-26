@@ -5,6 +5,7 @@ int PORT;
 char nameFile[MAX_DIM_NAME_FILE];
 
 int checkArgsInvalidServer(int argc, const char *argv[]){
+	
     if (argc!=4) {
         return 1;
     }
@@ -13,13 +14,17 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
     char *p = NULL;
     int a = (int) strtol(argv[1], &p, 10);
     if (p == NULL || *p != '\0'|| a<0 || a>65535) 
-        return 4;
+        return 2;
 
     // Second argument must exist
+	if(strlen(argv[2])>=MAX_DIM_NAME_FILE-1) return 3;
+
+	if(access(argv[2], F_OK)<0) return 4;
+	if(access(argv[2], R_OK)<0) return 5;
+	if(access(argv[2], W_OK)<0) return 6;
+
     int fd = open(argv[2], O_WRONLY);
-    if (fd<0 || strlen(argv[2])>=MAX_DIM_NAME_FILE-1) {
-        return 3;
-    }
+    if (fd<0) return 7;
 	int dim;
 	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
         perror("cannot seek\n");
@@ -29,8 +34,9 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
 
     // Third argument must be positive (and other conditions to implements): genny
     int b = (int) strtol(argv[3], &p, 10);
-    if (p == NULL || *p != '\0'|| b<dim) 
-        return 4;
+    if (p == NULL || *p != '\0') return 8;
+
+	if (b<dim) return 9;
 
     PORT=a;
     strncpy(nameFile,argv[2],MAX_DIM_NAME_FILE-1);
@@ -89,7 +95,7 @@ void* mainThread(void* arg){
 
 	while(flag){
 		
-		unsigned char buffer[1000];
+		unsigned char buffer[DIM_BUFFER];
         if(0 == read(connectfd, &buffer, sizeof(buffer)))
 		   flag = false;
 		else{
