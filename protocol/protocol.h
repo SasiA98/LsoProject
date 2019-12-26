@@ -7,6 +7,8 @@
 
 #define DIM_BUFFER 500
 
+#define DIM_PARAMETERS 550
+
 typedef struct parameters{
     int error;	
 	int choice;
