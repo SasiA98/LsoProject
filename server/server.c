@@ -3,6 +3,14 @@
 
 int main(int argc, const char** argv){
 
+//---------DA CANCELLARE-----------
+	argc=4;
+	argv[1]="8080";
+	argv[2]="../file/Document.txt";
+	argv[3]="1000";
+
+//---------------------------------
+
 	int err;
 	if ((err=checkArgsInvalidServer(argc, argv))) {
     	printf("Usage: %s <TCP port> <Name File> <Max Dimension>\n", argv[0]);
