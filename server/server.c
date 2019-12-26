@@ -27,9 +27,9 @@ int main(int argc, const char** argv){
 				break;
 			case 7: fprintf(stderr,"Apertura del file fallita!\n");
 				break;
-			case 8: fprintf(stderr,"La dimensione deve essere un valore positivo\n");
+			case 8: fprintf(stderr,"La dimensione deve essere un valore positivo!\n");
 				break;
-			case 9: fprintf(stderr,"Dimensione massima inserita inferiore a quella reale\n");
+			case 9: fprintf(stderr,"Dimensione massima inserita inferiore a quella reale!\n");
 				break;
 		}
     	return err;
@@ -44,7 +44,15 @@ int main(int argc, const char** argv){
     socketfd = CreateSocket();
 	lenght = sizeof(client);
 
-	if(pthread_mutex_init(&mutex,NULL)){
+	syncro=(syncronize*)malloc(sizeof(syncronize)); 
+	syncro->numReader=0;
+
+	if(pthread_mutex_init(&(syncro->mutexWrite),NULL)){
+		perror("Mutex init\n");
+		exit(0);
+	}
+
+	if(pthread_mutex_init(&(syncro->mutexRead),NULL)){
 		perror("Mutex init\n");
 		exit(0);
 	}
@@ -73,9 +81,15 @@ int main(int argc, const char** argv){
 	
     }
 
-	if(pthread_mutex_destroy(&mutex)){
+	if(pthread_mutex_destroy(&(syncro->mutexWrite))){
 		perror("Mutex destroy\n");
 	}
+
+	if(pthread_mutex_destroy(&(syncro->mutexRead))){
+		perror("Mutex destroy\n");
+	}
+
+	free(syncro);
 
 	close(socketfd);
 
