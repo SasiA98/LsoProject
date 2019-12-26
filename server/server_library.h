@@ -16,11 +16,18 @@
 
 #define MAX_DIM_NAME_FILE 50
 
-pthread_mutex_t mutex;
+typedef struct syncronize{
+    pthread_mutex_t mutexWrite;
+    pthread_mutex_t mutexRead;
+
+    int numReader;
+}syncronize;
+
+syncronize* syncro;
+
 
 
 typedef struct management{
-
     int connectfd;
     parameters *par;
 }management;
