@@ -4,6 +4,13 @@
 
 int main(int argc, const char ** argv){
 
+//---------DA CANCELLARE-----------
+	argc=3;
+	argv[1]="127.0.0.1";
+	argv[2]="8080";
+
+//---------------------------------
+
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
     	printf("Usage: %s <IP address> <TCP port>\n", argv[0]);
