@@ -11,9 +11,6 @@
 #include <arpa/inet.h>
 #include "../protocol/protocol.h"
 
-//#define PORT 8080
-//#define IP_PORT "127.0.0.1"
-
 int PORT;
 char IP_PORT[20];
 
