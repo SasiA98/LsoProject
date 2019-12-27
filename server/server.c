@@ -10,6 +10,9 @@ int main(int argc, const char** argv){
 
 //---------------------------------
 
+
+	signal(SIGPIPE,SIG_IGN);
+
 	int err;
 	if ((err=checkArgsInvalidServer(argc, argv))) {
 		switch(err){
