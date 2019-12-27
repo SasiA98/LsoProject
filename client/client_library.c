@@ -1,5 +1,10 @@
 #include "client_library.h"
 
+void hendler(int signum){
+    printf("SIGPIPE error, connection lost...\n");
+    exit(0);
+}
+
 int checkArgsInvalidClient(int argc, const char *argv[]){
     if (argc!=3) {
         return 1;
@@ -38,9 +43,9 @@ int getInt(){
     int num;
     bool vuoto;
     char* fine;
-    char* temp=(char*)malloc(sizeof(char)* 20);
+    char* temp=(char*)malloc(sizeof(char)* 30);
     do {
-        getStr(temp, 10);
+        getStr(temp, 30);
 
         if(strlen(temp)==0) vuoto=true;
         else vuoto=false;
