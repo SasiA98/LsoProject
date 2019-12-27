@@ -5,7 +5,6 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
         return 1;
     }
 
-
     // Second argument must be positive (and other conditions to implements): genny
     char *p = NULL;
     int a = (int) strtol(argv[2], &p, 10);
@@ -38,9 +37,9 @@ int getInt(){
     int num;
     bool vuoto;
     char* fine;
-    char* temp=(char*)malloc(sizeof(char)* 20);
+    char* temp=(char*)malloc(sizeof(char)* 30);
     do {
-        getStr(temp, 10);
+        getStr(temp, 30);
 
         if(strlen(temp)==0) vuoto=true;
         else vuoto=false;
@@ -53,7 +52,7 @@ int getInt(){
 }
 
 void clientFunctions(int socketfd){ 
-	parameters *par =(parameters *)malloc(sizeof(parameters)); // In C the initialization usually is automatic :sasi
+	parameters *par =(parameters *)malloc(sizeof(parameters)); 
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
@@ -62,8 +61,8 @@ void clientFunctions(int socketfd){
 
 		while(par->choice<0 || par->choice>3){
 			printf("Valore fuori dal range!\nInserire di nuovo:");
-			par->choice=getInt();
-		}
+			par->choice=getInt(); // If I insert a bigger value than 10 byte, the program cycles until the length of the input ends
+ 		}
         
 		if(par->choice==0){
 			printf("Esco.\n");
@@ -84,7 +83,8 @@ void clientFunctions(int socketfd){
 void dimension(int socketfd, parameters *par){
     
     unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS];
-
+    par->error = 0; 
+    
     serializeParameters(bufferW, par); 
     write(socketfd,&bufferW,sizeof(bufferW));
 
@@ -112,8 +112,8 @@ void writeFile(int socketfd,parameters *par){
             printf("Inserisci l'indice da cui partire\n");
             printf("From: ");
             par->from=getInt(); 
-            printf("Inserisci stringa da scrivere: ");
-            getStr(par->buffer,DIM_BUFFER-1); 
+            printf("Inserisci stringa da scrivere (MAX %d): ", DIM_BUFFER);
+            getStr(par->buffer,DIM_BUFFER-1); //If stdin get over dim_buffer (?)
         
             if(par->from < 0) 
                printf("Errore: from dev'essere necessariamente maggiore o uguale di 0\n");
@@ -137,14 +137,14 @@ void writeFile(int socketfd,parameters *par){
 
 void readFile(int socketfd, parameters *par){
     
-    bool flag = false;
+    bool flag = true;
     unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS]; //Does it need clear the buffer when the client do a new request?
     do 
     {
         par->error = 0; 
         do
         {
-            printf("Inserisci il range da leggere\n");
+            printf("Inserisci il range da leggere (MAX %d)\n",DIM_BUFFER);
             printf("From: ");
             par->from=getInt(); 
             printf("To: ");
@@ -159,8 +159,8 @@ void readFile(int socketfd, parameters *par){
         write(socketfd,&bufferW,sizeof(bufferW));
 
     	read(socketfd, &bufferR, sizeof(bufferR));
-    	par = deserializeParameters(bufferR, par);  
-       
+    	par = deserializeParameters(bufferR, par);
+                 
         if(par->error != 0){
             printf("%s\n",par->buffer);
             if(par->error == 2)
@@ -168,6 +168,6 @@ void readFile(int socketfd, parameters *par){
         }
         else   
            printf("Ecco la stringa letta dal file :\n%s\n\n",par->buffer); 
-
-    } while (par->error != 0 && flag == true);
+  
+      } while (par->error != 0 && flag == true);
 }

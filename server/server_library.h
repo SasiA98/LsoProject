@@ -25,8 +25,6 @@ typedef struct syncronize{
 
 syncronize* syncro;
 
-
-
 typedef struct management{
     int connectfd;
     parameters *par;
