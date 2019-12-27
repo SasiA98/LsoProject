@@ -101,7 +101,6 @@ void dimension(int socketfd, parameters *par){
     }
     else{
         printf("%s",par->buffer);
-        par->error=0;
     }
     
 }
