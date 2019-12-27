@@ -88,10 +88,12 @@ void clientFunctions(int socketfd){
 void dimension(int socketfd, parameters *par){
     
     unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS];
+    int errore = 0;
     par->error = 0; 
     
     serializeParameters(bufferW, par); 
-    write(socketfd,&bufferW,sizeof(bufferW));
+    if((errore = write(socketfd,&bufferW,sizeof(bufferW))== -1)) //modificato
+        printf("errore\n");
 
 	read(socketfd, &bufferR, sizeof(bufferR));
 	par = deserializeParameters(bufferR, par);

@@ -178,9 +178,10 @@ void* readThread(void* arg){
         pthread_mutex_lock(&(syncro->mutexRead));
 		syncro->numReader++;
 
-    	if ((syncro->numReader)==1) 
+    	if ((syncro->numReader)==1){ 
     	    pthread_mutex_lock(&(syncro->mutexWrite));
-	    pthread_mutex_unlock(&(syncro->mutexRead));
+		}
+		pthread_mutex_unlock(&(syncro->mutexRead));
     	
 		if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1){
     	    perror("lseek error");
@@ -207,9 +208,10 @@ void* readThread(void* arg){
         pthread_mutex_lock(&(syncro->mutexRead));
 	    syncro->numReader--;
 	
-     	if ((syncro->numReader)==0)     
+     	if ((syncro->numReader)==0){     
         	pthread_mutex_unlock(&(syncro->mutexWrite));
-	    pthread_mutex_unlock(&(syncro->mutexRead));
+		}
+		pthread_mutex_unlock(&(syncro->mutexRead));
 	}
 
     serializeParameters(buffer, man->par); 
