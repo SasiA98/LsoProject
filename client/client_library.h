@@ -21,7 +21,7 @@ void hendler(int signum);
 int checkArgsInvalidClient(int argc, const char *argv[]);
 void getStr(char * str, uint len);
 int getInt();
-void faultyConnection(parameters *par);
+void faultyConnection(int numRequest, parameters *par);
 void clientFunctions(int sockfd);
 void dimension(int socketfd, parameters *par);
 void readFile(int socketfd ,parameters *par);

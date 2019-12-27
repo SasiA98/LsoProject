@@ -127,7 +127,7 @@ void* mainThread(void* arg){
 
 void* writeThread(void* arg){   
 	management *man = ((management *) arg);
-	man->par->error = 0; 
+	man->par->numRequest++;
 
 	int fd, bufferSize;
 	unsigned char buffer[DIM_PARAMETERS];
@@ -163,7 +163,7 @@ void* writeThread(void* arg){
 void* readThread(void* arg){ 
    	
 	management *man = ((management *) arg);
-    man->par->error = 0; 
+	man->par->numRequest++;
 
 	int fd, offset;
 	char bufferFile[DIM_BUFFER];
@@ -229,7 +229,7 @@ void* readThread(void* arg){
 void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
-	man->par->error = 0; 
+	man->par->numRequest++;
 
     unsigned char buffer[DIM_PARAMETERS]; 
 

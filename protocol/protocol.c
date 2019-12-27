@@ -37,6 +37,7 @@ char deserialize_char(unsigned char *buffer)
 void serializeParameters(unsigned char* buffer, parameters *par)
 {
     parameters *temp = par;
+	buffer = serialize_int(buffer,temp->numRequest);
 	buffer = serialize_int(buffer,temp->error);
     buffer = serialize_int(buffer,temp->choice);
     buffer = serialize_int(buffer,temp->from);   
@@ -52,14 +53,15 @@ void serializeParameters(unsigned char* buffer, parameters *par)
 void deserializeParameters(unsigned char* buffer, parameters *par)
 {
     parameters *temp = par;
-    temp->error = deserialize_int(buffer);
-    temp->choice = deserialize_int(buffer+4);
-    temp->from = deserialize_int(buffer+8);
-    temp->to = deserialize_int(buffer+12);
-    temp->dimFile = deserialize_int(buffer+16);    
+    temp->numRequest = deserialize_int(buffer);
+    temp->error = deserialize_int(buffer+4);
+    temp->choice = deserialize_int(buffer+8);
+    temp->from = deserialize_int(buffer+12);
+    temp->to = deserialize_int(buffer+16);
+    temp->dimFile = deserialize_int(buffer+20);    
   
     int i=0;
-    int j=20;
+    int j=24;
     
     do
     {

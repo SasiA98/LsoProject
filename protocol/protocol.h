@@ -10,6 +10,7 @@
 #define DIM_PARAMETERS 550
 
 typedef struct parameters{
+    int numRequest;
     int error;	
 	int choice;
     int from;
