@@ -1,5 +1,10 @@
 #include "client_library.h"
 
+void hendler(int signum){
+    printf("SIGPIPE error, connection lost...\n");
+    exit(0);
+}
+
 int checkArgsInvalidClient(int argc, const char *argv[]){
     if (argc!=3) {
         return 1;

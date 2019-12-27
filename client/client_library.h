@@ -16,6 +16,8 @@ char IP_PORT[20];
 
 typedef unsigned int uint;
 
+void hendler(int signum);
+
 int checkArgsInvalidClient(int argc, const char *argv[]);
 void getStr(char * str, uint len);
 int getInt();

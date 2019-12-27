@@ -11,6 +11,8 @@ int main(int argc, const char ** argv){
 
 //---------------------------------
 
+	signal(SIGPIPE,hendler);
+
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
     	printf("Usage: %s <IP address> <TCP port>\n", argv[0]);
