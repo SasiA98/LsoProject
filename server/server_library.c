@@ -93,9 +93,11 @@ void* mainThread(void* arg){
 	
 	man->connectfd = connectfd;
 
+	unsigned char buffer[DIM_BUFFER];
+
 	while(flag){
 		
-		unsigned char buffer[DIM_BUFFER];
+		
         if(0 == read(connectfd, &buffer, sizeof(buffer)))
 		   flag = false;
 		else{
@@ -116,6 +118,7 @@ void* mainThread(void* arg){
 	    	}
 		}
 	}
+
 	free(man);
 	free(arg);
 	free(par);
