@@ -161,7 +161,7 @@ void* readThread(void* arg){
    	management *man = ((management *) arg);
 
 	int fd, offset;
-	char bufferFile[DIM_PARAMETERS];
+	char bufferFile[DIM_BUFFER];
 	unsigned char buffer[DIM_PARAMETERS];
 
 	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy OK
@@ -206,7 +206,7 @@ void* readThread(void* arg){
 
 
 	    bufferFile[bufferSize]='\0';	 
-		strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1); // Probabile segmantation fault usare strncpy al posto di strcpy : Genny
+		strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1);
 	}
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
