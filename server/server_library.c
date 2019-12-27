@@ -205,7 +205,7 @@ void* readThread(void* arg){
 	                        perror("read error");
 
 	                    bufferFile[bufferSize]='\0';	 
-	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1); // Probabile segmantation fault usare strncpy al posto di strcpy : Genny
+	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1);
                  	} 
  	
         pthread_mutex_lock(&(syncro->mutexRead));
@@ -246,7 +246,7 @@ void* dimThread(void* arg){
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
         perror("cannot seek\n");
-        man->par->error=1;
+        man->par->error=2;
     }
     else{
         man->par->dimFile=dim;
