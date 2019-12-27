@@ -56,6 +56,12 @@ int getInt(){
     return  num;
 }
 
+void faultyConnection(parameters *par){
+    if(par->error == -1){
+        printf("Quei\n");
+    }
+}
+
 void clientFunctions(int socketfd){ 
 	parameters *par =(parameters *)malloc(sizeof(parameters)); 
 
@@ -88,13 +94,16 @@ void clientFunctions(int socketfd){
 void dimension(int socketfd, parameters *par){
     
     unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS];
-    par->error = 0; 
-    
+    par->error = -1; 
+    printf("%d  before\n",par->error);
     serializeParameters(bufferW, par); 
-    write(socketfd,&bufferW,sizeof(bufferW));
+    write(socketfd,&bufferW,sizeof(bufferW)); //We should manage the cases in which the 'write' returns -1
 
 	read(socketfd, &bufferR, sizeof(bufferR));
-	par = deserializeParameters(bufferR, par);
+	deserializeParameters(bufferR, par);
+
+    faultyConnection(par);
+    printf("%d  after\n",par->error);
 
     if(par->error==0){
         printf("Dimensione:%d\n",par->dimFile);
@@ -110,7 +119,7 @@ void writeFile(int socketfd,parameters *par){
     unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS]; //Does it need clear the buffer when the client do a new request?
     do 
     {
-        par->error = 0; 
+        par->error = -1; 
         do
         {
             printf("Inserisci l'indice da cui partire\n");
@@ -128,7 +137,7 @@ void writeFile(int socketfd,parameters *par){
         write(socketfd,&bufferW,sizeof(bufferW));
 
     	read(socketfd, &bufferR, sizeof(bufferR));
-    	par = deserializeParameters(bufferR, par);  
+    	deserializeParameters(bufferR, par);  
        
         if(par->error != 0){
             printf("%s\n",par->buffer);
@@ -145,7 +154,7 @@ void readFile(int socketfd, parameters *par){
     unsigned char bufferR[DIM_PARAMETERS], bufferW[DIM_PARAMETERS]; //Does it need clear the buffer when the client do a new request?
     do 
     {
-        par->error = 0; 
+        par->error = -1; 
         do
         {
             printf("Inserisci il range da leggere (MAX %d)\n",DIM_BUFFER);
@@ -163,7 +172,7 @@ void readFile(int socketfd, parameters *par){
         write(socketfd,&bufferW,sizeof(bufferW));
 
     	read(socketfd, &bufferR, sizeof(bufferR));
-    	par = deserializeParameters(bufferR, par);
+    	deserializeParameters(bufferR, par);
                  
         if(par->error != 0){
             printf("%s\n",par->buffer);

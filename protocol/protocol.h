@@ -23,7 +23,7 @@ unsigned char * serialize_char(unsigned char *buffer, char value);
 int deserialize_int(unsigned char *buffer);
 char deserialize_char(unsigned char *buffer);
 void serializeParameters(unsigned char* msg, parameters *par);
-parameters *deserializeParameters(unsigned char* buffer, parameters *par);
+void deserializeParameters(unsigned char* buffer, parameters *par);
 
 
 #endif

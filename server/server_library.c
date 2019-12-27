@@ -97,11 +97,10 @@ void* mainThread(void* arg){
 
 	while(flag){
 		
-		
         if(0 == read(connectfd, &buffer, sizeof(buffer)))
 		   flag = false;
 		else{
-		   par = deserializeParameters(buffer, par);
+		   deserializeParameters(buffer, par);
 	       man->par = par;
 
         	if(par->choice==1){
@@ -128,6 +127,7 @@ void* mainThread(void* arg){
 
 void* writeThread(void* arg){   
 	management *man = ((management *) arg);
+	man->par->error = 0; 
 
 	int fd, bufferSize;
 	unsigned char buffer[DIM_PARAMETERS];
@@ -161,7 +161,9 @@ void* writeThread(void* arg){
 }
    
 void* readThread(void* arg){ 
-   	management *man = ((management *) arg);
+   	
+	management *man = ((management *) arg);
+    man->par->error = 0; 
 
 	int fd, offset;
 	char bufferFile[DIM_BUFFER];
@@ -227,6 +229,8 @@ void* readThread(void* arg){
 void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
+	man->par->error = 0; 
+
     unsigned char buffer[DIM_PARAMETERS]; 
 
     int fd, dim=0;

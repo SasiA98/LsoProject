@@ -1,7 +1,6 @@
 #include "protocol.h"
 
 
-
 unsigned char * serialize_int(unsigned char *buffer, int value)
 {
     buffer[0] = value >> 24;
@@ -35,40 +34,40 @@ char deserialize_char(unsigned char *buffer)
 }
 
 
-
 void serializeParameters(unsigned char* buffer, parameters *par)
 {
-	buffer = serialize_int(buffer,par->error);
-    buffer = serialize_int(buffer,par->choice);
-    buffer = serialize_int(buffer,par->from);   
-	buffer = serialize_int(buffer,par->to);
-    buffer = serialize_int(buffer,par->dimFile);
+    parameters *temp = par;
+	buffer = serialize_int(buffer,temp->error);
+    buffer = serialize_int(buffer,temp->choice);
+    buffer = serialize_int(buffer,temp->from);   
+	buffer = serialize_int(buffer,temp->to);
+    buffer = serialize_int(buffer,temp->dimFile);
 
-	for(int i=0; i<strlen(par->buffer)+1; i++)
-        buffer = serialize_char(buffer,par->buffer[i]);  
+	for(int i=0; i<strlen(temp->buffer)+1; i++)
+        buffer = serialize_char(buffer,temp->buffer[i]);  
 }
 
 
 
-parameters * deserializeParameters(unsigned char* buffer, parameters *par)
+void deserializeParameters(unsigned char* buffer, parameters *par)
 {
-    par->error = deserialize_int(buffer);
-    par->choice = deserialize_int(buffer+4);
-    par->from = deserialize_int(buffer+8);
-    par->to = deserialize_int(buffer+12);
-    par->dimFile = deserialize_int(buffer+16);    
+    parameters *temp = par;
+    temp->error = deserialize_int(buffer);
+    temp->choice = deserialize_int(buffer+4);
+    temp->from = deserialize_int(buffer+8);
+    temp->to = deserialize_int(buffer+12);
+    temp->dimFile = deserialize_int(buffer+16);    
   
     int i=0;
     int j=20;
     
     do
     {
-        par->buffer[i] = deserialize_char((buffer+j));
+        temp->buffer[i] = deserialize_char((buffer+j));
         i++;
         j++;
-    }while(par->buffer[i-1]!='\0'); 
+    }while(temp->buffer[i-1]!='\0'); 
     
     j++; 
-    
-    return par;
+
 }
