@@ -148,7 +148,7 @@ void* writeThread(void* arg){
 		if (bufferSize != write(fd, man->par->buffer, bufferSize))    
 	        perror("write error"); 
 	
-	    strncpy(man->par->buffer,"OK\0",DIM_BUFFER-1); //Valore non letto dal client.
+	    strncpy(man->par->buffer,"OK\0",DIM_BUFFER-1); //Valore non letto dal client, vedere se strncpy lo mette di default 
 	}
 
 	pthread_mutex_unlock(&(syncro->mutexWrite));
@@ -172,45 +172,51 @@ void* readThread(void* arg){
     if ((fd = open(nameFile, O_RDONLY)) == -1) //Does it need any permission? : sasy    
 	    perror("open error");   
   
-    if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1)
-	     perror("lseek error");
-
-	if(bufferSize >= DIM_BUFFER){
+    if(bufferSize >= DIM_BUFFER){
 	   strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER-1);
 	   man->par->error = 3;
-
-	}else if(offset == 0){
-	   strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER-1);
-	   man->par->error = 2;
-
-	}else if(offset < man->par->to){ 	  
-	   strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER-1);
-	   man->par->error = 1;
-	   
-	}else{
-		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-	    perror("lseek error");
-
-
-		pthread_mutex_lock(&(syncro->mutexRead));
-		syncro->numReader++;
-		if ((syncro->numReader)==1) pthread_mutex_lock(&(syncro->mutexWrite));
-		pthread_mutex_unlock(&(syncro->mutexRead));
-
-
-		if (bufferSize != read(fd, bufferFile, bufferSize))    
-	        perror("read error");
-
-
-		pthread_mutex_lock(&(syncro->mutexRead));
-		syncro->numReader--;
-		if ((syncro->numReader)==0) pthread_mutex_unlock(&(syncro->mutexWrite));
-		pthread_mutex_unlock(&(syncro->mutexRead));
-
-
-	    bufferFile[bufferSize]='\0';	 
-		strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1);
 	}
+
+    if(man->par->error != 3){
+        pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader++;
+
+    	if ((syncro->numReader)==1){ 
+    	    pthread_mutex_lock(&(syncro->mutexWrite));
+		}
+		pthread_mutex_unlock(&(syncro->mutexRead));
+    	
+		if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1){
+    	    perror("lseek error");
+    
+    	 }else if(offset == 0){
+	            strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER-1);
+	            man->par->error = 2;
+
+             	}else if(offset < man->par->to){ 	  
+    	            strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER-1);
+    	            man->par->error = 1;
+	   
+                	}else{
+		                if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
+	                        perror("lseek error");
+
+	                	if (bufferSize != read(fd, bufferFile, bufferSize))    
+	                        perror("read error");
+
+	                    bufferFile[bufferSize]='\0';	 
+	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1); // Probabile segmantation fault usare strncpy al posto di strcpy : Genny
+                 	} 
+ 	
+        pthread_mutex_lock(&(syncro->mutexRead));
+	    syncro->numReader--;
+	
+     	if ((syncro->numReader)==0){     
+        	pthread_mutex_unlock(&(syncro->mutexWrite));
+		}
+		pthread_mutex_unlock(&(syncro->mutexRead));
+	}
+
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
     
@@ -233,7 +239,9 @@ void* dimThread(void* arg){
 
 	pthread_mutex_lock(&(syncro->mutexRead));
 	syncro->numReader++;
-	if ((syncro->numReader)==1) pthread_mutex_lock(&(syncro->mutexWrite));
+	
+	if ((syncro->numReader)==1) 
+	    pthread_mutex_lock(&(syncro->mutexWrite));
 	pthread_mutex_unlock(&(syncro->mutexRead));
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
@@ -246,10 +254,12 @@ void* dimThread(void* arg){
 
 	pthread_mutex_lock(&(syncro->mutexRead));
 	syncro->numReader--;
-	if ((syncro->numReader)==0) pthread_mutex_unlock(&(syncro->mutexWrite));
+
+	if ((syncro->numReader)==0) 
+	    pthread_mutex_unlock(&(syncro->mutexWrite));
 	pthread_mutex_unlock(&(syncro->mutexRead));
     
-	
+
 	serializeParameters(buffer, man->par); 
   	write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
 
