@@ -89,24 +89,21 @@ int CreateSocket(){
 void* mainThread(void* arg){
 
     bool flag = true;
+	int connectfd = *((int *)arg);
+   	unsigned char buffer[DIM_BUFFER]={};
+    pthread_t threadDim, threadRead, threadWrite;
 
     parameters *par = (parameters *)malloc(sizeof(parameters));
 	management *man = (management *)malloc(sizeof(management));
-
-    pthread_t threadDim, threadRead, threadWrite;
-	int connectfd = *((int *)arg);
-	
 	man->connectfd = connectfd;
-
-	unsigned char buffer[DIM_BUFFER]={};
 
 	while(flag){
 		
         if(0 == read(connectfd, buffer, sizeof(buffer)))
 		   flag = false;
 		else{
-		   deserializeParameters(buffer, par);
-	       man->par = par;
+		    deserializeParameters(buffer, par);
+	        man->par = par;
 
         	if(par->choice==1){
 	    		pthread_create(&threadDim,NULL,dimThread,man);
