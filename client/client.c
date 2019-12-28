@@ -16,9 +16,11 @@ int main(int argc, const char ** argv){
 	signal(SIGILL,hendler);
 	signal(SIGQUIT,hendler);
 
+    printf("----------------------- LSO PROJECT -----------------------\n\n");
+
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
-    	printf("Usage: %s <IP address> <TCP port>\n", argv[0]);
+    	printf("Parametri: %s <IP address> <TCP port>\n", argv[0]);
     	return err;
   	}
 
@@ -28,11 +30,11 @@ int main(int argc, const char ** argv){
     // socket create and varification 
 	socketfd = socket(AF_INET, SOCK_STREAM, 0); 
 	if (socketfd == -1) { 
-		perror("Socket creation failed"); 
+		perror("Creazione della socket fallita"); 
 		exit(0); 
 	} 
 	else
-		printf("Socket successfully created..\n"); 
+		printf("Socket creata con successo\n"); 
 	
 	bzero(&servaddr, sizeof(servaddr)); 
 
@@ -43,13 +45,15 @@ int main(int argc, const char ** argv){
 
 	// connect the client socket to server socket 
 	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 
-		perror("Connection with the server failed"); 
+		perror("Connessione con il server fallita"); 
 		exit(0); 
 	}
 	else
-		printf("Connected to the server..\n"); 
- 
+		printf("Connesso al server..\n"); 
+
+	printf("\n\n");	
 	clientFunctions(socketfd); 
+	
 	// close the socket 
 	close(socketfd); 
 

@@ -15,6 +15,7 @@ int PORT;
 char IP_PORT[20];
 
 typedef unsigned int uint;
+typedef unsigned char uchar;
 
 void hendler(int signum);
 

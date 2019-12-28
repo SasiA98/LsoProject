@@ -1,7 +1,7 @@
 #include "client_library.h"
 
 void hendler(int signal){
-    perror("end of program");
+    perror("Fine del programma");
 	exit(1);
 }
 
@@ -50,7 +50,7 @@ int getInt(){
         else vuoto=false;
 
         num = strtol(temp, &fine, 10);
-        if(*fine!='\0' || vuoto) printf("\nValore errato, inserire di nuovo:");
+        if(*fine!='\0' || vuoto) printf("Valore errato, riprova:  ");
     }while (*fine!='\0' || vuoto);
     free(temp);
     return  num;
@@ -72,17 +72,19 @@ void clientFunctions(int socketfd){
     par->from=0;
     par->to=0;
     strcpy(&(par->buffer[0]),"0");
-
-
-	while(1) {  
-		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
+    
+	
+    while(1) {  
+   
+		printf("1]  Dimensione del file\n2]  Leggere da file\n3]  Scrivere su file\n0]  Exit\n\nScelta:  ");
 		par->choice=0;
         par->choice=getInt(); // if I press cntr+d it goes into a loop :sasi
 
 		while(par->choice<0 || par->choice>3){
-			printf("Valore fuori dal range!\nInserire di nuovo:");
+			printf("Valore fuori dal range, riprova:  ");
 			par->choice=getInt(); // If I insert a bigger value than 10 byte, the program cycles until the length of the input ends
  		}
+        printf("\n");
         
 		if(par->choice==0){
 			printf("Esco.\n");
@@ -104,7 +106,7 @@ void clientFunctions(int socketfd){
 
 void dimension(int socketfd, parameters *par){
     
-    unsigned char bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={};
+    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={};
     par->error = 0; 
     int numRequest = par->numRequest;
 
@@ -118,17 +120,17 @@ void dimension(int socketfd, parameters *par){
     faultyConnection(numRequest,par);
 
     if(par->error==0){
-        printf("Dimensione:%d\n",par->dimFile);
+        printf("Dimensione:  %d\n\n",par->dimFile);
     }
     else{
-        printf("%s",par->buffer);
+        printf("%s\n\n",par->buffer);
     }
     
 }
 
 void writeFile(int socketfd,parameters *par){
     
-    unsigned char bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; //Does it need clear the buffer when the client do a new request?
+    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; //Does it need clear the buffer when the client do a new request?
     do 
     {
         par->error = 0; 
@@ -136,14 +138,14 @@ void writeFile(int socketfd,parameters *par){
 
         do
         {
-            printf("Inserisci l'indice da cui partire\n");
+            printf("Inserisci la posizione da cui iniziare a scrivere\n");
             printf("From: ");
             par->from=getInt(); 
-            printf("Inserisci stringa da scrivere (MAX %d): ", DIM_BUFFER);
+            printf("Inserisci contenuto (MAX %d): ", DIM_BUFFER);
             getStr(par->buffer,DIM_BUFFER-1); //If stdin get over dim_buffer (?)
         
             if(par->from < 0) 
-               printf("Errore: from dev'essere necessariamente maggiore o uguale di 0\n");
+               printf("Errore:  'from' dev'essere maggiore o uguale di '0'\n\n");
 
         } while (par->from <0); 
     
@@ -156,10 +158,10 @@ void writeFile(int socketfd,parameters *par){
         faultyConnection(numRequest,par);
 
         if(par->error != 0){
-            printf("%s\n",par->buffer);
+            printf("%s\n\n",par->buffer);
         }
         else   
-           printf("La stringa e' stata inserita correttamente\n"); 
+           printf("La stringa e' stata inserita correttamente\n\n"); 
 
     } while (par->error != 0);
 }
@@ -167,7 +169,7 @@ void writeFile(int socketfd,parameters *par){
 void readFile(int socketfd, parameters *par){
     
     bool flag = true;
-    unsigned char bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; //Does it need clear the buffer when the client do a new request?
+    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; //Does it need clear the buffer when the client do a new request?
     do 
     {
         par->error = 0; 
@@ -182,7 +184,7 @@ void readFile(int socketfd, parameters *par){
             par->to=getInt(); 
         
             if(par->from > par->to || par->from < 0) 
-               printf("Errore: from dev'essere necessariamente maggiore o uguale di to e maggiore di 0\n");
+               printf("Errore:  'from' dev'essere maggiore di 'to' e maggiore di '0' \n\n");
 
         } while (par->from > par->to || par->from <0); 
     
@@ -195,12 +197,12 @@ void readFile(int socketfd, parameters *par){
         faultyConnection(numRequest,par);
        
         if(par->error != 0){
-            printf("%s\n",par->buffer);
+            printf("%s\n\n",par->buffer);
             if(par->error == 2)
                 flag = false;
         }
         else   
-           printf("Ecco la stringa letta dal file :\n%s\n\n",par->buffer); 
+           printf("Contenuto:  %s\n\n",par->buffer); 
   
       } while (par->error != 0 && flag == true);
 }
