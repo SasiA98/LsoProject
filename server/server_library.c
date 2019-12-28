@@ -107,7 +107,7 @@ void* mainThread(void* arg){
 	
 	man->connectfd = connectfd;
 
-	unsigned char buffer[DIM_BUFFER];
+	unsigned char buffer[DIM_BUFFER]={};
 
 	while(flag){
 		
@@ -144,7 +144,7 @@ void* writeThread(void* arg){
 	man->par->numRequest++;
 
 	int fd, bufferSize;
-	unsigned char buffer[DIM_PARAMETERS];
+	unsigned char buffer[DIM_PARAMETERS]={};
 
     if ((fd = open(nameFile, O_WRONLY)) == -1) //Do we notify to client the error of open file?
 	    perror("open error");   
@@ -180,8 +180,8 @@ void* readThread(void* arg){
 	man->par->numRequest++;
 
 	int fd, offset;
-	char bufferFile[DIM_BUFFER];
-	unsigned char buffer[DIM_PARAMETERS];
+	char bufferFile[DIM_BUFFER]={};
+	unsigned char buffer[DIM_PARAMETERS]={};
 
 	int bufferSize = man->par->to - man->par->from; 
 
@@ -245,7 +245,7 @@ void* dimThread(void* arg){
 	management *man = ((management *) arg);
 	man->par->numRequest++;
 
-    unsigned char buffer[DIM_PARAMETERS]; 
+    unsigned char buffer[DIM_PARAMETERS]={}; 
 
     int fd, dim=0;
 
