@@ -4,6 +4,30 @@ int dimension;
 int PORT;
 char nameFile[MAX_DIM_NAME_FILE];
 
+
+void handler(int signal){
+	if(signal==SIGINT){   //Just to give structure to the function 
+	    perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGSTOP){
+	    perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGILL){
+	    perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGQUIT){
+		perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGTERM){
+	    perror("end of program");
+		exit(1);
+	}
+}
+
 int checkArgsInvalidServer(int argc, const char *argv[]){
 	
     if (argc!=4) {
@@ -52,11 +76,9 @@ int CreateSocket(){
 
     socketfd=socket(AF_INET,SOCK_STREAM,0);
     if (socketfd == -1) { 
-		perror("Socket creation failed\n"); 
+		perror("Socket creation failed"); 
 		exit(0); 
 	} 
-	else
-		printf("Socket successfully created...\n"); 
 
     serveraddr.sin_family=AF_INET;
     serveraddr.sin_addr.s_addr=INADDR_ANY;
@@ -64,19 +86,15 @@ int CreateSocket(){
 
     //Bind del socket
     if ((bind(socketfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) != 0) { 
-		perror("Socket bind failed\n"); 
+		perror("Socket bind failed"); 
 		exit(0); 
 	} 
-	else
-		printf("Socket successfully binded...\n");   
 
     // Now server is ready to listen and verification 
 	if ((listen(socketfd, 5)) != 0) { 
-		perror("Listen failed\n"); 
+		perror("Listen failed"); 
 		exit(0); 
 	} 
-	else
-		printf("Server listening...\n"); 
 
     return socketfd;
 }
@@ -132,7 +150,7 @@ void* writeThread(void* arg){
 	int fd, bufferSize;
 	unsigned char buffer[DIM_PARAMETERS];
 
-    if ((fd = open(nameFile, O_WRONLY)) == -1) //Does it need any permission? : sasy    
+    if ((fd = open(nameFile, O_WRONLY)) == -1) //Do we notify to client the error of open file?
 	    perror("open error");   
 
 	pthread_mutex_lock(&(syncro->mutexWrite));
@@ -169,9 +187,9 @@ void* readThread(void* arg){
 	char bufferFile[DIM_BUFFER];
 	unsigned char buffer[DIM_PARAMETERS];
 
-	int bufferSize = man->par->to - man->par->from; // when read from keyboard check that from is smaller then to : sasy OK
+	int bufferSize = man->par->to - man->par->from; 
 
-    if ((fd = open(nameFile, O_RDONLY)) == -1) //Does it need any permission? : sasy    
+    if ((fd = open(nameFile, O_RDONLY)) == -1)
 	    perror("open error");   
   
     if(bufferSize >= DIM_BUFFER){
@@ -235,7 +253,7 @@ void* dimThread(void* arg){
 
     int fd, dim=0;
 
-    if ((fd = open(nameFile, O_RDONLY)) == -1){ //Does it need any permission? : sasy    
+    if ((fd = open(nameFile, O_RDONLY)) == -1){ 
 	    perror("open error");
         man->par->error=1;
         strncpy(man->par->buffer,"errore accesso file\n",DIM_BUFFER-1);
@@ -249,7 +267,7 @@ void* dimThread(void* arg){
 	pthread_mutex_unlock(&(syncro->mutexRead));
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-        perror("cannot seek\n");
+        perror("cannot seek");
         man->par->error=2;
     }
     else{

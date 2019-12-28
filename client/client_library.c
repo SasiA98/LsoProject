@@ -58,7 +58,7 @@ int getInt(){
 
 void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
     if(numRequest==par->numRequest){
-        perror("La connessione e' caduta");
+			fprintf(stderr,"La connessione e' caduta");
         exit(1);
     }
 }

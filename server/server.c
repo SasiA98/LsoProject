@@ -10,8 +10,12 @@ int main(int argc, const char** argv){
 
 //---------------------------------
 
-
 	signal(SIGPIPE,SIG_IGN);
+	signal(SIGINT, handler);
+	signal(SIGSTOP, handler);
+	signal(SIGQUIT, handler);
+	signal(SIGTERM, handler);
+	signal(SIGILL, handler);
 
 	int err;
 	if ((err=checkArgsInvalidServer(argc, argv))) {
@@ -37,9 +41,7 @@ int main(int argc, const char** argv){
 		}
     	return err;
   	}
-
-
-
+	  
 	int socketfd, connectfd, lenght; 
 	struct sockaddr_in client;
 	pthread_t threadMain;	
@@ -51,12 +53,12 @@ int main(int argc, const char** argv){
 	syncro->numReader=0;
 
 	if(pthread_mutex_init(&(syncro->mutexWrite),NULL)){
-		perror("Mutex init\n");
+		perror("Mutex init");
 		exit(0);
 	}
 
 	if(pthread_mutex_init(&(syncro->mutexRead),NULL)){
-		perror("Mutex init\n");
+		perror("Mutex init");
 		exit(0);
 	}
 
@@ -67,9 +69,7 @@ int main(int argc, const char** argv){
 	     	perror("Server accept failed\n"); 
 	     	exit(0); 
 	    } 
-     	else
-	     	printf("Server accept the client...\n");
-    
+  
         int* clientfd=(int*)malloc(sizeof(int));
     	*clientfd=connectfd;
 
@@ -84,16 +84,10 @@ int main(int argc, const char** argv){
 	
     }
 
-	if(pthread_mutex_destroy(&(syncro->mutexWrite))){
-		perror("Mutex destroy\n");
-	}
-
-	if(pthread_mutex_destroy(&(syncro->mutexRead))){
-		perror("Mutex destroy\n");
-	}
+	pthread_mutex_destroy(&(syncro->mutexWrite));
+	pthread_mutex_destroy(&(syncro->mutexRead));
 
 	free(syncro);
-
 	close(socketfd);
 
 	return 0;
