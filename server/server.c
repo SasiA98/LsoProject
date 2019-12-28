@@ -81,10 +81,6 @@ int main(int argc, const char** argv){
 		}	
     }
 
-	pthread_mutex_destroy(&(syncro->mutexWrite));
-	pthread_mutex_destroy(&(syncro->mutexRead));
-	free(syncro);
 	close(socketfd);
-
 	return 0;
 } 
