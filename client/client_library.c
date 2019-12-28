@@ -78,7 +78,7 @@ void clientFunctions(int socketfd){
 	
     while(1) {  
    
-		printf("1]  Dimensione del file\n2]  Leggere da file\n3]  Scrivere su file\n0]  Exit\n\nScelta:  ");
+		printf("1)  Dimensione del file\n2)  Leggere da file\n3)  Scrivere su file\n0)  Exit\n\nScelta:  ");
 		par->choice=0;
         par->choice=getInt(); // if I press cntr+d it goes into a loop :sasi
 
@@ -88,10 +88,8 @@ void clientFunctions(int socketfd){
  		}
         printf("\n");
         
-		if(par->choice==0){
-			printf("Esco.\n");
+		if(par->choice==0)
 			break;
-		}
 
 		switch (par->choice){
 			case 1: dimension(socketfd,par);
