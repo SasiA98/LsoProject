@@ -146,7 +146,7 @@ void* writeThread(void* arg){
 	management *man = ((management *) arg);
 	man->par->numRequest++;
 
-	int fd, bufferSize;
+	int fd, bufferSize, dim;
 	unsigned char buffer[DIM_PARAMETERS]={};
 
     if ((fd = open(nameFile, O_WRONLY)) == -1) //Do we notify to client the error of open file?
@@ -158,6 +158,17 @@ void* writeThread(void* arg){
 	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER-1);
 		man->par->error = 1;  
 	}else{
+		if ((dim=lseek(fd, 0, SEEK_END)) == -1)       
+	        perror("lseek error");
+
+		if(dim < man->par->from){
+			int space= (man->par->from - dim);
+			for(int i=0;i<space;i++){
+				write(fd," ",1);
+			}
+
+		}
+
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
 	        perror("lseek error");   
 
