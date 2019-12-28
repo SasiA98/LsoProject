@@ -30,6 +30,8 @@ typedef struct management{
     parameters *par;
 }management;
 
+typedef unsigned char uchar;
+
 void handler(int segnale);
 int checkArgsInvalidServer(int argc, const char *argv[]);
 int CreateSocket();

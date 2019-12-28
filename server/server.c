@@ -52,12 +52,12 @@ int main(int argc, const char** argv){
 	syncro->numReader=0;
 
 	if(pthread_mutex_init(&(syncro->mutexWrite),NULL)){
-		perror("Mutex init");
+		perror("Inizializzazione Mutex fallita");
 		exit(0);
 	}
 
 	if(pthread_mutex_init(&(syncro->mutexRead),NULL)){
-		perror("Mutex init");
+		perror("Inizializzazione Mutex fallita");
 		exit(0);
 	}
 
@@ -65,18 +65,18 @@ int main(int argc, const char** argv){
 	    // Accept the data packet from client and verification 
 	    connectfd = accept(socketfd, (struct sockaddr*)&client, (socklen_t*)&lenght); 
 	    if (connectfd < 0) { 
-	     	perror("Server accept failed\n"); 
+	     	perror("Server accept fallita"); 
 	     	exit(0); 
 	    } 
         int* clientfd=(int*)malloc(sizeof(int));
     	*clientfd=connectfd;
 		
     	if(pthread_create(&threadMain,NULL,mainThread,clientfd)!=0){
-			perror("Thread creation failed\n");
+			perror("Creazione thread fallita");
 			exit(0);
 		}
       	if(pthread_detach(threadMain)!=0){
-			  perror("Thread detach failed\n");
+			  perror("Thread detach fallita");
 			  exit(0);
 		}	
     }

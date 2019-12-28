@@ -20,7 +20,7 @@ int main(int argc, const char ** argv){
 
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
-    	printf("Parametri: %s <IP address> <TCP port>\n", argv[0]);
+    	printf("Usage: %s <IP address> <TCP port>\n", argv[0]);
     	return err;
   	}
 

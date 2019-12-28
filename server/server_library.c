@@ -10,7 +10,7 @@ void handler(int signal){
 	pthread_mutex_destroy(&(syncro->mutexWrite));
 	pthread_mutex_destroy(&(syncro->mutexRead));
 	free(syncro);
-	perror("end of program");
+	perror("Fine del programma");
 	exit(1);
 	
 }
@@ -38,10 +38,9 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
     if (fd<0) return 7;
 	int dim;
 	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-        perror("cannot seek\n");
+        perror("errore lseek");
     }
     close(fd);
-
 
     // Third argument must be positive (and other conditions to implements): genny
     int b = (int) strtol(argv[3], &p, 10);
@@ -63,7 +62,7 @@ int CreateSocket(){
 
     socketfd=socket(AF_INET,SOCK_STREAM,0);
     if (socketfd == -1) { 
-		perror("Socket creation failed"); 
+		perror("Creazione della socket fallita"); 
 		exit(0); 
 	} 
 
@@ -73,13 +72,13 @@ int CreateSocket(){
 
     //Bind del socket
     if ((bind(socketfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) != 0) { 
-		perror("Socket bind failed"); 
+		perror("Socket bind fallito"); 
 		exit(0); 
 	} 
 
     // Now server is ready to listen and verification 
 	if ((listen(socketfd, 5)) != 0) { 
-		perror("Listen failed"); 
+		perror("Listen fallito"); 
 		exit(0); 
 	} 
 
@@ -90,8 +89,9 @@ void* mainThread(void* arg){
 
     bool flag = true;
 	int connectfd = *((int *)arg);
-   	unsigned char buffer[DIM_BUFFER]={};
     pthread_t threadDim, threadRead, threadWrite;
+
+   	uchar buffer[DIM_BUFFER]={};
 
     parameters *par = (parameters *)malloc(sizeof(parameters));
 	management *man = (management *)malloc(sizeof(management));
@@ -128,42 +128,40 @@ void* mainThread(void* arg){
 }
 
 void* writeThread(void* arg){   
+
 	management *man = ((management *) arg);
 	man->par->numRequest++;
 
 	int fd, bufferSize, dim;
-	unsigned char buffer[DIM_PARAMETERS]={};
+	uchar buffer[DIM_PARAMETERS]={};
 
-    if ((fd = open(nameFile, O_WRONLY)) == -1) //Do we notify to client the error of open file?
-	    perror("open error");   
+    if ((fd = open(nameFile, O_WRONLY)) == -1) // How does it react if there is an error? : sasi
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
 
 	pthread_mutex_lock(&(syncro->mutexWrite));
 
     if(dimension < (man->par->from + strlen(man->par->buffer))){
-	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER-1);
-		man->par->error = 1;  
+	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER-1), man->par->error = 1;
 	}else{
 		if ((dim=lseek(fd, 0, SEEK_END)) == -1)       
-	        perror("lseek error");
+		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
 
 		if(dim < man->par->from){
 			int lenght=(man->par->from - dim);
 			char spaces[lenght];
 
-			for(int i=0;i<lenght;i++){
+			for(int i=0;i<lenght;i++){ //Do we have to add 'EOF' if we write after the 'EOF'? :sasi
 				spaces[i] = ' ';
 			}
 			write(fd,spaces,lenght); 
 		}
 
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-	        perror("lseek error");   
+		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
 
         bufferSize = strlen(man->par->buffer);
 		if (bufferSize != write(fd, man->par->buffer, bufferSize))    
-	        perror("write error"); 
-	
-	    strncpy(man->par->buffer,"OK\0",DIM_BUFFER-1); //Valore non letto dal client, vedere se strncpy lo mette di default 
+		    strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER-1), man->par->error = 1;
 	}
 
 	pthread_mutex_unlock(&(syncro->mutexWrite));
@@ -174,6 +172,8 @@ void* writeThread(void* arg){
 	close(fd);
     return NULL;
 }
+
+
    
 void* readThread(void* arg){ 
    	
@@ -182,16 +182,16 @@ void* readThread(void* arg){
 
 	int fd, offset;
 	char bufferFile[DIM_BUFFER]={};
-	unsigned char buffer[DIM_PARAMETERS]={};
+	uchar buffer[DIM_PARAMETERS]={};
 
 	int bufferSize = man->par->to - man->par->from; 
 
     if ((fd = open(nameFile, O_RDONLY)) == -1)
-	    perror("open error");   
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
   
     if(bufferSize >= DIM_BUFFER){
 	   strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER-1);
-	   man->par->error = 3;
+	   man->par->error = 1;
 	}
 
     if(man->par->error != 3){
@@ -204,7 +204,7 @@ void* readThread(void* arg){
 		pthread_mutex_unlock(&(syncro->mutexRead));
     	
 		if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1){
-    	    perror("lseek error");
+		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
     
     	 }else if(offset == 0){
 	            strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER-1);
@@ -216,10 +216,10 @@ void* readThread(void* arg){
 	   
                 	}else{
 		                if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-	                        perror("lseek error");
+		                    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
 
 	                	if (bufferSize != read(fd, bufferFile, bufferSize))    
-	                        perror("read error");
+		                    strncpy(man->par->buffer,"ERRORE: lettura su file non corretta\0",DIM_BUFFER-1), man->par->error = 1;
 
 	                    bufferFile[bufferSize]='\0';	 
 	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1);
@@ -246,14 +246,12 @@ void* dimThread(void* arg){
 	management *man = ((management *) arg);
 	man->par->numRequest++;
 
-    unsigned char buffer[DIM_PARAMETERS]={}; 
+    uchar buffer[DIM_PARAMETERS]={}; 
 
     int fd, dim=0;
 
     if ((fd = open(nameFile, O_RDONLY)) == -1){ 
-	    perror("open error");
-        man->par->error=1;
-        strncpy(man->par->buffer,"errore accesso file\n",DIM_BUFFER-1);
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
     }
 
 	pthread_mutex_lock(&(syncro->mutexRead));
@@ -264,8 +262,7 @@ void* dimThread(void* arg){
 	pthread_mutex_unlock(&(syncro->mutexRead));
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-        perror("cannot seek");
-        man->par->error=2;
+		strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
     }
     else{
         man->par->dimFile=dim;
@@ -283,6 +280,5 @@ void* dimThread(void* arg){
   	write(man->connectfd,(void*) buffer, sizeof(buffer)); 
 
     close(fd); 
-
     return NULL;
 } 
