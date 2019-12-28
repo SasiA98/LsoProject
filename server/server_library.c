@@ -153,7 +153,7 @@ void* writeThread(void* arg){
 			for(int i=0;i<lenght;i++){
 				spaces[i] = ' ';
 			}
-			write(fd,spaces,lenght); // EOF ?
+			write(fd,spaces,lenght); 
 		}
 
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       

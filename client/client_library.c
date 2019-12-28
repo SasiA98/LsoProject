@@ -1,28 +1,9 @@
 #include "client_library.h"
 
 void hendler(int signal){
-    if(signal==SIGINT){   //Just to give structure to the function 
-	    perror("end of program");
-		exit(1);
-	}
-	if(signal==SIGILL){
-	    perror("end of program");
-		exit(1);
-	}
-	if(signal==SIGPIPE){
-	    perror("end of program");
-		exit(1);
-	}    
-	if(signal==SIGQUIT){
-		perror("end of program");
-		exit(1);
-	}
-	if(signal==SIGTERM){
-	    perror("end of program");
-		exit(1);
-	}
+    perror("end of program");
+	exit(1);
 }
-
 
 int checkArgsInvalidClient(int argc, const char *argv[]){
     if (argc!=3) {
