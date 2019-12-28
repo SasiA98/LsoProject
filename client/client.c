@@ -1,7 +1,6 @@
 #include "client_library.h"
 
 
-
 int main(int argc, const char ** argv){
 
 //---------DA CANCELLARE-----------
@@ -12,6 +11,10 @@ int main(int argc, const char ** argv){
 //---------------------------------
 
 	signal(SIGPIPE,hendler);
+	signal(SIGINT,hendler);
+	signal(SIGTERM,hendler);
+	signal(SIGILL,hendler);
+	signal(SIGQUIT,hendler);
 
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
@@ -30,6 +33,7 @@ int main(int argc, const char ** argv){
 	} 
 	else
 		printf("Socket successfully created..\n"); 
+	
 	bzero(&servaddr, sizeof(servaddr)); 
 
 	// assign IP, PORT 
@@ -46,7 +50,6 @@ int main(int argc, const char ** argv){
 		printf("Connected to the server..\n"); 
  
 	clientFunctions(socketfd); 
-
 	// close the socket 
 	close(socketfd); 
 

@@ -111,7 +111,7 @@ void* mainThread(void* arg){
 
 	while(flag){
 		
-        if(0 == read(connectfd, &buffer, sizeof(buffer)))
+        if(0 == read(connectfd, buffer, sizeof(buffer)))
 		   flag = false;
 		else{
 		   deserializeParameters(buffer, par);
@@ -168,7 +168,7 @@ void* writeThread(void* arg){
 	pthread_mutex_unlock(&(syncro->mutexWrite));
 
     serializeParameters(buffer, man->par); 
-    write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
+    write(man->connectfd,(void*) buffer, sizeof(buffer)); 
     
 	close(fd);
     return NULL;
@@ -234,7 +234,7 @@ void* readThread(void* arg){
 	}
 
     serializeParameters(buffer, man->par); 
-    write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
+    write(man->connectfd,(void*) buffer, sizeof(buffer)); 
     
 	close(fd);
     return NULL;
@@ -279,7 +279,7 @@ void* dimThread(void* arg){
     
 
 	serializeParameters(buffer, man->par); 
-  	write(man->connectfd,(void*) &buffer, sizeof(buffer)); 
+  	write(man->connectfd,(void*) buffer, sizeof(buffer)); 
 
     close(fd); 
 
