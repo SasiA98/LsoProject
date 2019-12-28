@@ -41,7 +41,7 @@ int main(int argc, const char** argv){
 		}
     	return err;
   	}
-	  
+
 	int socketfd, connectfd, lenght; 
 	struct sockaddr_in client;
 	pthread_t threadMain;	
@@ -69,10 +69,9 @@ int main(int argc, const char** argv){
 	     	perror("Server accept failed\n"); 
 	     	exit(0); 
 	    } 
-  
         int* clientfd=(int*)malloc(sizeof(int));
     	*clientfd=connectfd;
-
+		
     	if(pthread_create(&threadMain,NULL,mainThread,clientfd)!=0){
 			perror("Thread creation failed\n");
 			exit(0);
@@ -80,13 +79,11 @@ int main(int argc, const char** argv){
       	if(pthread_detach(threadMain)!=0){
 			  perror("Thread detach failed\n");
 			  exit(0);
-		}
-	
+		}	
     }
 
 	pthread_mutex_destroy(&(syncro->mutexWrite));
 	pthread_mutex_destroy(&(syncro->mutexRead));
-
 	free(syncro);
 	close(socketfd);
 

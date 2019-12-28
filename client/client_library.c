@@ -1,9 +1,28 @@
 #include "client_library.h"
 
-void hendler(int signum){
-    printf("SIGPIPE error, connection lost...\n");
-    exit(0);
+void hendler(int signal){
+    if(signal==SIGINT){   //Just to give structure to the function 
+	    perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGILL){
+	    perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGPIPE){
+	    perror("end of program");
+		exit(1);
+	}    
+	if(signal==SIGQUIT){
+		perror("end of program");
+		exit(1);
+	}
+	if(signal==SIGTERM){
+	    perror("end of program");
+		exit(1);
+	}
 }
+
 
 int checkArgsInvalidClient(int argc, const char *argv[]){
     if (argc!=3) {
@@ -59,7 +78,7 @@ int getInt(){
 void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
     if(numRequest==par->numRequest){
 			fprintf(stderr,"La connessione e' caduta");
-        exit(1);
+            exit(1);
     }
 }
 
@@ -99,10 +118,11 @@ void dimension(int socketfd, parameters *par){
     int numRequest = par->numRequest;
 
     serializeParameters(bufferW, par); 
-    write(socketfd,&bufferW,sizeof(bufferW)); //We should manage the cases in which the 'write' returns -1
+    write(socketfd,bufferW,sizeof(bufferW)); //We should manage the cases in which the 'write' returns -1
 
-	read(socketfd, &bufferR, sizeof(bufferR));
-	deserializeParameters(bufferR, par);
+    
+    if(read(socketfd, bufferR, sizeof(bufferR))>0)
+        deserializeParameters(bufferR, par);
 
     faultyConnection(numRequest,par);
 
@@ -137,10 +157,10 @@ void writeFile(int socketfd,parameters *par){
         } while (par->from <0); 
     
         serializeParameters(bufferW, par); 
-        write(socketfd,&bufferW,sizeof(bufferW));
+        write(socketfd,bufferW,sizeof(bufferW));
 
-    	read(socketfd, &bufferR, sizeof(bufferR));
-    	deserializeParameters(bufferR, par);  
+        if(read(socketfd, bufferR, sizeof(bufferR))>0)
+            deserializeParameters(bufferR, par);
        
         faultyConnection(numRequest,par);
 
@@ -176,13 +196,13 @@ void readFile(int socketfd, parameters *par){
         } while (par->from > par->to || par->from <0); 
     
         serializeParameters(bufferW, par); 
-        write(socketfd,&bufferW,sizeof(bufferW));
-
-    	read(socketfd, &bufferR, sizeof(bufferR));
-    	deserializeParameters(bufferR, par);
-                 
+        write(socketfd,bufferW,sizeof(bufferW));
+    	
+        if(read(socketfd, bufferR, sizeof(bufferR))>0)
+            deserializeParameters(bufferR, par);
+      
         faultyConnection(numRequest,par);
-
+       
         if(par->error != 0){
             printf("%s\n",par->buffer);
             if(par->error == 2)
