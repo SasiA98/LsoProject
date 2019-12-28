@@ -59,12 +59,14 @@ int getInt(){
 void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
     if(numRequest==par->numRequest){
 			fprintf(stderr,"La connessione e' caduta");
+            free(par);
         exit(1);
     }
 }
 
 void clientFunctions(int socketfd){ 
 	parameters *par =(parameters *)malloc(sizeof(parameters)); 
+    par->numRequest=0;
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
@@ -78,7 +80,7 @@ void clientFunctions(int socketfd){
         
 		if(par->choice==0){
 			printf("Esco.\n");
-			exit(0);
+			break;
 		}
 
 		switch (par->choice){
@@ -90,6 +92,8 @@ void clientFunctions(int socketfd){
 			break;
 		}
 	}
+
+    free(par);
 }
 
 void dimension(int socketfd, parameters *par){
