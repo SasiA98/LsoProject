@@ -12,16 +12,16 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
         return 1;
     }
 
-    // Second argument must be positive (and other conditions to implements): genny
+    // Controllo lunghezza massima primo argomento.
+    if (strlen(argv[1])>=19) {
+        return 2;
+    }
+
+    // Controllo che il secondo argomento rispetti i vincoli.
     char *p = NULL;
     int a = (int) strtol(argv[2], &p, 10);
     if (p == NULL || *p != '\0'|| a<0 || a>65535) 
-        return 4;
-
-    // First argument
-    if (strlen(argv[1])>=19) {
         return 3;
-    }
 
     strncpy(IP_PORT,argv[1],19);
     PORT=a;
@@ -29,7 +29,7 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
     return 0;
 }
 
-void getStr(char * str, uint len){
+void getStr(char * str, uint len){ // Funzione safe per la lettura da tastiera di stringhe.
   assert(str != NULL);
   uint i;
   char c;
@@ -40,7 +40,7 @@ void getStr(char * str, uint len){
   str[i] = '\0';
 }
 
-int getInt(){
+int getInt(){ //Funzione safe per la lettura da tastiera di numeri.
     int num;
     bool vuoto;
     char* fine;
