@@ -10,10 +10,6 @@ void handler(int signal){
 	    perror("end of program");
 		exit(1);
 	}
-	if(signal==SIGSTOP){
-	    perror("end of program");
-		exit(1);
-	}
 	if(signal==SIGILL){
 	    perror("end of program");
 		exit(1);
