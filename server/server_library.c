@@ -21,13 +21,13 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
         return 1;
     }
 
-    // First argument must be positive (and other conditions to implements): genny
+    // Controllo che il primo argomento rispetti i vincoli.
     char *p = NULL;
     int a = (int) strtol(argv[1], &p, 10);
     if (p == NULL || *p != '\0'|| a<0 || a>65535) 
         return 2;
 
-    // Second argument must exist
+    // Controllo che il file esiste e che esistano i permessi di lettura/scrittura.
 	if(strlen(argv[2])>=MAX_DIM_NAME_FILE-1) return 3;
 
 	if(access(argv[2], F_OK)<0) return 4;
@@ -42,7 +42,7 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
     }
     close(fd);
 
-    // Third argument must be positive (and other conditions to implements): genny
+    // Controllo che la dimensione sia un numero intero maggiore della dimensione del file.
     int b = (int) strtol(argv[3], &p, 10);
     if (p == NULL || *p != '\0') return 8;
 
@@ -70,13 +70,11 @@ int CreateSocket(){
     serveraddr.sin_addr.s_addr=INADDR_ANY;
     serveraddr.sin_port=htons(PORT);
 
-    //Bind del socket
     if ((bind(socketfd, (struct sockaddr*)&serveraddr, sizeof(serveraddr))) != 0) { 
 		perror("Socket bind fallito"); 
 		exit(0); 
 	} 
-
-    // Now server is ready to listen and verification 
+ 
 	if ((listen(socketfd, 5)) != 0) { 
 		perror("Listen fallito"); 
 		exit(0); 
@@ -85,7 +83,7 @@ int CreateSocket(){
     return socketfd;
 }
 
-void* mainThread(void* arg){
+void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client.
 
     bool flag = true;
 	int connectfd = *((int *)arg);
