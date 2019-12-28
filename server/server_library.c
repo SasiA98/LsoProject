@@ -147,11 +147,13 @@ void* writeThread(void* arg){
 	        perror("lseek error");
 
 		if(dim < man->par->from){
-			int space= (man->par->from - dim);
-			for(int i=0;i<space;i++){
-				write(fd," ",1);
-			}
+			int lenght=(man->par->from - dim);
+			char spaces[lenght];
 
+			for(int i=0;i<lenght;i++){
+				spaces[i] = ' ';
+			}
+			write(fd,spaces,lenght); // EOF ?
 		}
 
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
