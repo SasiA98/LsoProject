@@ -1,5 +1,7 @@
 #include "client_library.h"
 
+parameters* par;
+
 void hendler(int signal){
     perror("Fine del programma");
 	exit(1);
@@ -65,7 +67,7 @@ void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value
 }
 
 void clientFunctions(int socketfd){ 
-	parameters *par =(parameters *)malloc(sizeof(parameters)); 
+	par =(parameters *)malloc(sizeof(parameters)); 
     par->numRequest=0;
     par->dimFile=0;
     par->error=0;
