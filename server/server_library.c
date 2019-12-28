@@ -8,6 +8,9 @@ char nameFile[MAX_DIM_NAME_FILE];
 void handler(int signal){
 	if(signal==SIGINT){   //Just to give structure to the function 
 	    perror("end of program");
+		pthread_mutex_destroy(&(syncro->mutexWrite));
+		pthread_mutex_destroy(&(syncro->mutexRead));
+		free(syncro);
 		exit(1);
 	}
 	if(signal==SIGILL){
