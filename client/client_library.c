@@ -77,8 +77,8 @@ int getInt(){
 
 void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
     if(numRequest==par->numRequest){
-			fprintf(stderr,"La connessione e' caduta");
-            free(par);
+		fprintf(stderr,"La connessione e' caduta");
+        free(par);
         exit(1);
     }
 }
@@ -86,6 +86,12 @@ void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value
 void clientFunctions(int socketfd){ 
 	parameters *par =(parameters *)malloc(sizeof(parameters)); 
     par->numRequest=0;
+    par->dimFile=0;
+    par->error=0;
+    par->from=0;
+    par->to=0;
+    strcpy(&(par->buffer[0]),"0");
+
 
 	while(1) {  
 		printf("Inserisci 1 se vuoi conoscere la dimensione del file\nInserisci 2 per leggere da file\nInserisci 3 per scrivere su file\nInserisci 0 per uscire\nInserito: ");
@@ -121,7 +127,7 @@ void dimension(int socketfd, parameters *par){
     par->error = 0; 
     int numRequest = par->numRequest;
 
-    serializeParameters(bufferW, par); 
+    serializeParameters(bufferW, par);
     write(socketfd,bufferW,sizeof(bufferW)); //We should manage the cases in which the 'write' returns -1
 
     
