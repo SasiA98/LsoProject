@@ -1,7 +1,7 @@
 #include "client_library.h"
 
 void hendler(int signum){
-    printf("SIGPIPE error, connection lost...\n");
+    printf("%d error, connection lost...\n",signum);
     exit(0);
 }
 
