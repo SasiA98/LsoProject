@@ -16,6 +16,7 @@ int main(int argc, const char** argv){
 	signal(SIGTERM, handler);
 	signal(SIGILL, handler);
 
+	// Controlli all'avvio del server.
 	int err;
 	if ((err=checkArgsInvalidServer(argc, argv))) {
 		switch(err){
@@ -61,8 +62,7 @@ int main(int argc, const char** argv){
 		exit(0);
 	}
 
-    while(1){
-	    // Accept the data packet from client and verification 
+    while(1){ 
 	    connectfd = accept(socketfd, (struct sockaddr*)&client, (socklen_t*)&lenght); 
 	    if (connectfd < 0) { 
 	     	perror("Server accept fallita"); 
