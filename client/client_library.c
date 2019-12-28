@@ -1,27 +1,12 @@
 #include "client_library.h"
 
+parameters* par;
+
 void hendler(int signal){
-    if(signal==SIGINT){   //Just to give structure to the function 
+        free(par);
 	    perror("end of program");
 		exit(1);
 	}
-	if(signal==SIGILL){
-	    perror("end of program");
-		exit(1);
-	}
-	if(signal==SIGPIPE){
-	    perror("end of program");
-		exit(1);
-	}    
-	if(signal==SIGQUIT){
-		perror("end of program");
-		exit(1);
-	}
-	if(signal==SIGTERM){
-	    perror("end of program");
-		exit(1);
-	}
-}
 
 
 int checkArgsInvalidClient(int argc, const char *argv[]){
@@ -84,7 +69,7 @@ void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value
 }
 
 void clientFunctions(int socketfd){ 
-	parameters *par =(parameters *)malloc(sizeof(parameters)); 
+	par =(parameters *)malloc(sizeof(parameters)); 
     par->numRequest=0;
     par->dimFile=0;
     par->error=0;
