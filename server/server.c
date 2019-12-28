@@ -12,7 +12,6 @@ int main(int argc, const char** argv){
 
 	signal(SIGPIPE,SIG_IGN);
 	signal(SIGINT, handler);
-	signal(SIGSTOP, handler);
 	signal(SIGQUIT, handler);
 	signal(SIGTERM, handler);
 	signal(SIGILL, handler);
