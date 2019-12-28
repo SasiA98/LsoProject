@@ -8,7 +8,6 @@ void hendler(int signal){
 		exit(1);
 	}
 
-
 int checkArgsInvalidClient(int argc, const char *argv[]){
     if (argc!=3) {
         return 1;
