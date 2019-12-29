@@ -133,7 +133,7 @@ void* writeThread(void* arg){
 	int fd, bufferSize, dim;
 	uchar buffer[DIM_PARAMETERS]={};
 
-    if ((fd = open(nameFile, O_WRONLY)) == -1) // How does it react if there is an error? : sasi
+    if ((fd = open(nameFile, O_WRONLY)) == -1) 
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
 
 	pthread_mutex_lock(&(syncro->mutexWrite));
@@ -192,7 +192,7 @@ void* readThread(void* arg){
 	   man->par->error = 1;
 	}
 
-    if(man->par->error != 3){
+    if(man->par->error != 1){
         pthread_mutex_lock(&(syncro->mutexRead));
 		syncro->numReader++;
 
