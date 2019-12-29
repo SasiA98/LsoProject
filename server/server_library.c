@@ -134,15 +134,15 @@ void* writeThread(void* arg){
 	uchar buffer[DIM_PARAMETERS]={};
 
     if ((fd = open(nameFile, O_WRONLY)) == -1) 
-	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
 
 	pthread_mutex_lock(&(syncro->mutexWrite));
 
     if(dimension < (man->par->from + strlen(man->par->buffer))){
-	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER-1), man->par->error = 1;
+	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER), man->par->error = 1;
 	}else{
 		if ((dim=lseek(fd, 0, SEEK_END)) == -1)       
-		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
+		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
 
 		if(dim < man->par->from){
 			int lenght=(man->par->from - dim);
@@ -155,11 +155,11 @@ void* writeThread(void* arg){
 		}
 
 		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
+		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
 
         bufferSize = strlen(man->par->buffer);
 		if (bufferSize != write(fd, man->par->buffer, bufferSize))    
-		    strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER-1), man->par->error = 1;
+		    strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 	}
 
 	pthread_mutex_unlock(&(syncro->mutexWrite));
@@ -182,13 +182,13 @@ void* readThread(void* arg){
 	char bufferFile[DIM_BUFFER]={};
 	uchar buffer[DIM_PARAMETERS]={};
 
-	int bufferSize = man->par->to - man->par->from; 
+	int bufferSize = man->par->to - man->par->from +1; 
 
     if ((fd = open(nameFile, O_RDONLY)) == -1)
-	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
   
-    if(bufferSize >= DIM_BUFFER){
-	   strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER-1);
+    if(bufferSize > DIM_BUFFER-1){
+	   strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER);
 	   man->par->error = 1;
 	}
 
@@ -202,25 +202,25 @@ void* readThread(void* arg){
 		pthread_mutex_unlock(&(syncro->mutexRead));
     	
 		if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1){
-		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
+		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
     
     	 }else if(offset == 0){
-	            strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER-1);
+	            strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER);
 	            man->par->error = 2;
 
              	}else if(offset < man->par->to){ 	  
-    	            strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER-1);
+    	            strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER);
     	            man->par->error = 1;
 	   
                 	}else{
 		                if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-		                    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
+		                    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
 
 	                	if (bufferSize != read(fd, bufferFile, bufferSize))    
-		                    strncpy(man->par->buffer,"ERRORE: lettura su file non corretta\0",DIM_BUFFER-1), man->par->error = 1;
+		                    strncpy(man->par->buffer,"ERRORE: lettura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 
 	                    bufferFile[bufferSize]='\0';	 
-	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER-1);
+	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER);
                  	} 
  	
         pthread_mutex_lock(&(syncro->mutexRead));
@@ -249,7 +249,7 @@ void* dimThread(void* arg){
     int fd, dim=0;
 
     if ((fd = open(nameFile, O_RDONLY)) == -1){ 
-	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER-1), man->par->error = 1;
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
     }
 
 	pthread_mutex_lock(&(syncro->mutexRead));
@@ -260,7 +260,7 @@ void* dimThread(void* arg){
 	pthread_mutex_unlock(&(syncro->mutexRead));
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-		strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER-1), man->par->error = 1;
+		strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
     }
     else{
         man->par->dimFile=dim;

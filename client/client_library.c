@@ -141,7 +141,7 @@ void writeFile(int socketfd,parameters *par){
             printf("Inserisci la posizione da cui iniziare a scrivere\n");
             printf("From: ");
             par->from=getInt(); 
-            printf("Inserisci contenuto (MAX %d): ", DIM_BUFFER);
+            printf("Inserisci contenuto (MAX %d): ", DIM_BUFFER-1);
             getStr(par->buffer,DIM_BUFFER-1); //If stdin get over dim_buffer (?)
         
             if(par->from < 0) 
@@ -177,7 +177,7 @@ void readFile(int socketfd, parameters *par){
 
         do
         {
-            printf("Inserisci il range da leggere (MAX %d)\n",DIM_BUFFER);
+            printf("Inserisci il range da leggere (MAX %d)\n",DIM_BUFFER-1);
             printf("From: ");
             par->from=getInt(); 
             printf("To: ");

@@ -7,7 +7,7 @@
 
 #define DIM_BUFFER 500
 
-#define DIM_PARAMETERS 550
+#define DIM_PARAMETERS DIM_BUFFER+24
 
 typedef struct parameters{
     int numRequest;

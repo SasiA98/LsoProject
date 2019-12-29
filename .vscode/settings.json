@@ -3,6 +3,7 @@
         "client_library.h": "c",
         "socket.h": "c",
         "serialization.h": "c",
-        "server_library.h": "c"
+        "server_library.h": "c",
+        "stdio.h": "c"
     }
 }

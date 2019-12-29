@@ -1,6 +1,5 @@
 #include "protocol.h"
 
-
 unsigned char * serialize_int(unsigned char *buffer, int value)
 {
     buffer[0] = value >> 24;
