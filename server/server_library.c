@@ -97,7 +97,7 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 
 	while(flag){
 		
-        if(0 == read(connectfd, buffer, sizeof(buffer)))
+        if(0 >= read(connectfd, buffer, sizeof(buffer))) // I have changed, check if works 
 		   flag = false;
 		else{
 		    deserializeParameters(buffer, par);
@@ -121,7 +121,7 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 	free(man);
 	free(arg);
 	free(par);
-	
+
 	return NULL;
 }
 
