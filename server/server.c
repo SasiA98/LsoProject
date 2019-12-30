@@ -49,6 +49,7 @@ int main(int argc, const char** argv){
     socketfd = CreateSocket();
 	lenght = sizeof(client);
 
+    //Creazione struttura mutex 
 	syncro=(syncronize*)malloc(sizeof(syncronize)); 
 	syncro->numReader=0;
 

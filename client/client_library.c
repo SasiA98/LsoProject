@@ -2,10 +2,14 @@
 
 parameters* par;
 
+
+
 void hendler(int signal){
     perror("Fine del programma");
 	exit(1);
 }
+
+
 
 int checkArgsInvalidClient(int argc, const char *argv[]){
     if (argc!=3) {
@@ -29,6 +33,8 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
     return 0;
 }
 
+
+
 void getStr(char * str, uint len){ // Funzione safe per la lettura da tastiera di stringhe.
   assert(str != NULL);
   uint i;
@@ -39,6 +45,8 @@ void getStr(char * str, uint len){ // Funzione safe per la lettura da tastiera d
     }
   str[i] = '\0';
 }
+
+
 
 int getInt(){ //Funzione safe per la lettura da tastiera di numeri.
     int num;
@@ -58,6 +66,32 @@ int getInt(){ //Funzione safe per la lettura da tastiera di numeri.
     return  num;
 }
 
+
+
+int createSocket(struct sockaddr_in servaddr){
+    
+    int socketfd;
+
+    socketfd = socket(AF_INET, SOCK_STREAM, 0); 
+	if (socketfd == -1) { 
+		perror("Creazione della socket fallita"); 
+		exit(0); 
+	} 
+	else
+		printf("Socket creata con successo\n"); 
+	
+	bzero(&servaddr, sizeof(servaddr)); 
+
+	// assegnazione IP, PORT 
+	servaddr.sin_family = AF_INET; 
+	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
+	servaddr.sin_port = htons(PORT);
+
+    return socketfd;
+}
+
+
+
 void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
     if(numRequest==par->numRequest){
 		fprintf(stderr,"La connessione e' caduta");
@@ -65,6 +99,8 @@ void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value
         exit(1);
     }
 }
+
+
 
 void clientFunctions(int socketfd){ 
 	par =(parameters *)malloc(sizeof(parameters)); 
@@ -84,7 +120,7 @@ void clientFunctions(int socketfd){
 
 		while(par->choice<0 || par->choice>3){
 			printf("Valore fuori dal range, riprova:  ");
-			par->choice=getInt(); // If I insert a bigger value than 10 byte, the program cycles until the length of the input ends
+			par->choice=getInt(); // If I insert a value bigger than 10 byte, the program cycles until the length of the input ends : sasi
  		}
         printf("\n");
         
@@ -104,6 +140,8 @@ void clientFunctions(int socketfd){
     free(par);
 }
 
+
+
 void dimension(int socketfd, parameters *par){
     
     uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={};
@@ -111,10 +149,9 @@ void dimension(int socketfd, parameters *par){
     int numRequest = par->numRequest;
 
     serializeParameters(bufferW, par);
-    write(socketfd,bufferW,sizeof(bufferW)); //We should manage the cases in which the 'write' returns -1
-
+    write(socketfd,bufferW,sizeof(bufferW)); 
     
-    if(read(socketfd, bufferR, sizeof(bufferR))>0)
+    if(read(socketfd, bufferR, sizeof(bufferR))>0)  // We should evaluate the case in witch the function doesn'read all the bytes from socket : sasi 
         deserializeParameters(bufferR, par);
 
     faultyConnection(numRequest,par);
@@ -128,9 +165,11 @@ void dimension(int socketfd, parameters *par){
     
 }
 
+
+
 void writeFile(int socketfd,parameters *par){
     
-    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; //Does it need clear the buffer when the client do a new request?
+    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; 
     do 
     {
         par->error = 0; 
@@ -166,10 +205,12 @@ void writeFile(int socketfd,parameters *par){
     } while (par->error != 0);
 }
 
+
+
 void readFile(int socketfd, parameters *par){
     
     bool flag = true;
-    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; //Does it need clear the buffer when the client do a new request?
+    uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={}; 
     do 
     {
         par->error = 0; 

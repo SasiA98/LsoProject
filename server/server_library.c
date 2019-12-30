@@ -15,6 +15,8 @@ void handler(int signal){
 	
 }
 
+
+
 int checkArgsInvalidServer(int argc, const char *argv[]){
 	
     if (argc!=4) {
@@ -55,6 +57,8 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
     return 0;
 }
 
+
+
 int CreateSocket(){
 
     int socketfd;
@@ -82,6 +86,8 @@ int CreateSocket(){
 
     return socketfd;
 }
+
+
 
 void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client.
 
@@ -125,6 +131,8 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 	return NULL;
 }
 
+
+
 void* writeThread(void* arg){   
 
 	management *man = ((management *) arg);
@@ -140,6 +148,7 @@ void* writeThread(void* arg){
 
     if(dimension < (man->par->from + strlen(man->par->buffer))){
 	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER), man->par->error = 1;
+
 	}else{
 		if ((dim=lseek(fd, 0, SEEK_END)) == -1)       
 		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
@@ -187,13 +196,13 @@ void* readThread(void* arg){
     if ((fd = open(nameFile, O_RDONLY)) == -1)
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
   
-    if(bufferSize > DIM_BUFFER-1){
-	   strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER);
-	   man->par->error = 1;
-	}
+    if(bufferSize > DIM_BUFFER-1)
+	    strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER),  man->par->error = 1;
+
 
     if(man->par->error != 1){
-        pthread_mutex_lock(&(syncro->mutexRead));
+       
+	    pthread_mutex_lock(&(syncro->mutexRead));
 		syncro->numReader++;
 
     	if ((syncro->numReader)==1){ 
@@ -239,14 +248,15 @@ void* readThread(void* arg){
     return NULL;
 } 
 
+
+
 void* dimThread(void* arg){ 
     
 	management *man = ((management *) arg);
 	man->par->numRequest++;
 
     uchar buffer[DIM_PARAMETERS]={}; 
-
-    int fd, dim=0;
+	int fd, dim=0;
 
     if ((fd = open(nameFile, O_RDONLY)) == -1){ 
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
@@ -261,8 +271,8 @@ void* dimThread(void* arg){
 
     if ((dim=lseek(fd, 0, SEEK_END)) == -1){
 		strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
-    }
-    else{
+    
+	}else{
         man->par->dimFile=dim;
     }
 

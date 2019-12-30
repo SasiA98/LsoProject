@@ -9,11 +9,15 @@ unsigned char * serialize_int(unsigned char *buffer, int value)
     return buffer + 4;
 }
 
+
+
 unsigned char * serialize_char(unsigned char *buffer, char value)
 {
     buffer[0] = value;
     return buffer + 1;
 }
+
+
 
 int deserialize_int(unsigned char *buffer)
 {
@@ -27,10 +31,13 @@ int deserialize_int(unsigned char *buffer)
 
 }
 
+
+
 char deserialize_char(unsigned char *buffer)
 {
     return buffer[0];
 }
+
 
 
 void serializeParameters(unsigned char* buffer, parameters *par)
@@ -46,6 +53,7 @@ void serializeParameters(unsigned char* buffer, parameters *par)
 	for(int i=0; i<strlen(temp->buffer)+1; i++)
         buffer = serialize_char(buffer,temp->buffer[i]);  
 }
+
 
 
 void deserializeParameters(unsigned char* buffer, parameters *par)
