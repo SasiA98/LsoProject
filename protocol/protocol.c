@@ -48,7 +48,6 @@ void serializeParameters(unsigned char* buffer, parameters *par)
 }
 
 
-
 void deserializeParameters(unsigned char* buffer, parameters *par)
 {
     parameters *temp = par;

@@ -16,7 +16,7 @@ int main(int argc, const char ** argv){
 	signal(SIGILL,hendler);
 	signal(SIGQUIT,hendler);
 
-    printf("----------------------- LSO PROJECT -----------------------\n\n");
+    printf("\n\n----------------------- LSO PROJECT -----------------------\n\n");
 
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
