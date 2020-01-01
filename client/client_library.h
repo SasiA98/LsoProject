@@ -22,7 +22,6 @@ void hendler(int signum);
 int checkArgsInvalidClient(int argc, const char *argv[]);
 void getStr(char * str, uint len);
 int getInt();
-int createSocket(struct sockaddr_in servaddr);
 void faultyConnection(int numRequest, parameters *par);
 void clientFunctions(int sockfd);
 void dimension(int socketfd, parameters *par);

@@ -68,30 +68,6 @@ int getInt(){ //Funzione safe per la lettura da tastiera di numeri.
 
 
 
-int createSocket(struct sockaddr_in servaddr){
-    
-    int socketfd;
-
-    socketfd = socket(AF_INET, SOCK_STREAM, 0); 
-	if (socketfd == -1) { 
-		perror("Creazione della socket fallita"); 
-		exit(0); 
-	} 
-	else
-		printf("Socket creata con successo\n"); 
-	
-	bzero(&servaddr, sizeof(servaddr)); 
-
-	// assegnazione IP, PORT 
-	servaddr.sin_family = AF_INET; 
-	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
-	servaddr.sin_port = htons(PORT);
-
-    return socketfd;
-}
-
-
-
 void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
     if(numRequest==par->numRequest){
 		fprintf(stderr,"La connessione e' caduta");

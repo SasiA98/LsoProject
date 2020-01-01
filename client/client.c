@@ -27,7 +27,20 @@ int main(int argc, const char ** argv){
 	int socketfd; 
 	struct sockaddr_in servaddr; 
 
-    socketfd = createSocket(servaddr);
+    socketfd = socket(AF_INET, SOCK_STREAM, 0); 
+	if (socketfd == -1) { 
+		perror("Creazione della socket fallita"); 
+		exit(0); 
+	} 
+	else
+		printf("Socket creata con successo\n"); 
+	
+	bzero(&servaddr, sizeof(servaddr)); 
+
+	// assegnazione IP, PORT 
+	servaddr.sin_family = AF_INET; 
+	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
+	servaddr.sin_port = htons(PORT);
 	
 	// connessione cllient  - server tramite socket
 	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 

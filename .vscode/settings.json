@@ -4,6 +4,8 @@
         "socket.h": "c",
         "serialization.h": "c",
         "server_library.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "protocol.h": "c",
+        "assert.h": "c"
     }
 }
