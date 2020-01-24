@@ -39,7 +39,6 @@ int main(int argc, const char ** argv){
 	// assegnazione IP, PORT 
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
-	
 	servaddr.sin_port = htons(PORT);
 
 	// connessione client  - server tramite socket
