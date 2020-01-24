@@ -32,8 +32,6 @@ int main(int argc, const char ** argv){
 		perror("Creazione della socket fallita"); 
 		exit(0); 
 	} 
-	else
-		printf("Socket creata con successo\n"); 
 	
 	bzero(&servaddr, sizeof(servaddr)); 
 
@@ -42,13 +40,13 @@ int main(int argc, const char ** argv){
 	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
 	servaddr.sin_port = htons(PORT);
 	
-	// connessione cllient  - server tramite socket
+	// connessione client - server tramite socket
 	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 
 		perror("Connessione con il server fallita"); 
 		exit(0); 
 	}
 	else
-		printf("Connesso al server..\n"); 
+		printf("Connesso al server...\n"); 
 
 	printf("\n\n");	
 	clientFunctions(socketfd); 
