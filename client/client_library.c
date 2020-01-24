@@ -5,7 +5,7 @@ parameters* par;
 
 
 void hendler(int signal){
-    perror("Fine del programma");
+    perror("Fine del programma\n");
 	exit(1);
 }
 
@@ -40,20 +40,20 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
 
 
 
-void getStr(char * str, uint len){ // Funzione safe per la lettura da tastiera di stringhe.
-  assert(str != NULL);
-  uint i;
-  char c;
-  for(i = 0; (i < len) && ((c = getchar()) != '\n') && (c != EOF); ++i)
-    {
+void getStr(char * str, uint len){ //Funzione per la lettura da tastiera di stringhe.
+    assert(str != NULL);
+    uint i;
+    char c;
+    for(i = 0; (i < len) && ((c = getchar()) != '\n') && (c != EOF); ++i){
       str[i] = c;
     }
-  str[i] = '\0';
+    while ((i>=len) && (c = getchar()) != '\n' && c != EOF) { }
+    str[i] = '\0';
 }
 
 
 
-int getInt(){ //Funzione safe per la lettura da tastiera di numeri.
+int getInt(){ //Funzione per la lettura da tastiera di numeri.
     int num;
     bool vuoto;
     char* fine;
@@ -73,7 +73,7 @@ int getInt(){ //Funzione safe per la lettura da tastiera di numeri.
 
 
 
-void faultyConnection(int numRequest, parameters *par){ //Evaluate the max value that numRequest can reach
+void faultyConnection(int numRequest, parameters *par){
     if(numRequest==par->numRequest){
 		fprintf(stderr,"La connessione e' caduta");
         free(par);
@@ -97,11 +97,11 @@ void clientFunctions(int socketfd){
    
 		printf("1)  Dimensione del file\n2)  Leggere da file\n3)  Scrivere su file\n0)  Exit\n\nScelta:  ");
 		par->choice=0;
-        par->choice=getInt(); // if I press cntr+d it goes into a loop :sasi
+        par->choice=getInt();
 
 		while(par->choice<0 || par->choice>3){
 			printf("Valore fuori dal range, riprova:  ");
-			par->choice=getInt(); // If I insert a value bigger than 10 byte, the program cycles until the length of the input ends : sasi
+			par->choice=getInt();
  		}
         printf("\n");
         
@@ -165,7 +165,7 @@ void writeFile(int socketfd,parameters *par){
             getStr(par->buffer,DIM_BUFFER-1); //If stdin get over dim_buffer (?)
         
             if(par->from < 0) 
-               printf("Errore:  'from' dev'essere maggiore o uguale di '0'\n\n");
+               printf("Errore: 'from' dev'essere maggiore o uguale di '0'\n\n");
 
         } while (par->from <0); 
     
@@ -224,7 +224,7 @@ void readFile(int socketfd, parameters *par){
                 flag = false;
         }
         else   
-           printf("Contenuto:  %s\n\n",par->buffer); 
+           printf("Contenuto:\n%s\n\n",par->buffer); 
   
       } while (par->error != 0 && flag == true);
 }

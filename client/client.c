@@ -32,8 +32,6 @@ int main(int argc, const char ** argv){
 		perror("Creazione della socket fallita"); 
 		exit(0); 
 	} 
-	else
-		printf("Socket creata con successo\n"); 
 	
 	bzero(&servaddr, sizeof(servaddr)); 
 	// assegnazione IP, PORT 
@@ -47,7 +45,7 @@ int main(int argc, const char ** argv){
 		exit(0); 
 	}
 	else
-		printf("Connesso al server..\n"); 
+		printf("Connesso al server...\n"); 
 
 	printf("\n\n");	
 	clientFunctions(socketfd); 
