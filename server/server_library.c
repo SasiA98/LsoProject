@@ -40,7 +40,8 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
     if (fd<0) return 7;
 	int dim;
 	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-        perror("errore lseek");
+        perror("Errore lseek");
+		exit(0);
     }
     close(fd);
 
@@ -103,7 +104,7 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 
 	while(flag){
 		
-        if(0 >= read(connectfd, buffer, sizeof(buffer))) // I have changed, check if works 
+        if(read(connectfd, buffer, sizeof(buffer))<=0) // I have changed, check if works 
 		   flag = false;
 		else{
 		    deserializeParameters(buffer, par);
@@ -141,42 +142,43 @@ void* writeThread(void* arg){
 	int fd, bufferSize, dim;
 	uchar buffer[DIM_PARAMETERS]={};
 
-    if ((fd = open(nameFile, O_WRONLY)) == -1) 
+    if ((fd = open(nameFile, O_WRONLY)) == -1){
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
-
-	pthread_mutex_lock(&(syncro->mutexWrite));
-
-    if(dimension < (man->par->from + strlen(man->par->buffer))){
-	    strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER), man->par->error = 1;
-
 	}else{
-		if ((dim=lseek(fd, 0, SEEK_END)) == -1)       
-		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+		pthread_mutex_lock(&(syncro->mutexWrite));
 
-		if(dim < man->par->from){
-			int lenght=(man->par->from - dim);
-			char spaces[lenght];
+    	if(dimension < (man->par->from + strlen(man->par->buffer))){
+	    	strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER), man->par->error = 1;
 
-			for(int i=0;i<lenght;i++){ //Do we have to add 'EOF' if we write after the 'EOF'? :sasi
-				spaces[i] = ' ';
+		}else{
+			if ((dim=lseek(fd, 0, SEEK_END)) == -1){     
+		    	strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+
+			}else if(dim < man->par->from){
+				int lenght=(man->par->from - dim);
+				char spaces[lenght];
+
+				for(int i=0;i<lenght;i++){
+					spaces[i] = ' ';
+				}
+				write(fd,(void*)spaces,lenght); 
+			}else if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1){       
+		    	strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+			}else{
+        		bufferSize = strlen(man->par->buffer);
+				if (bufferSize != write(fd, man->par->buffer, bufferSize))    
+		    		strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 			}
-			write(fd,spaces,lenght); 
 		}
 
-		if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+		pthread_mutex_unlock(&(syncro->mutexWrite));
 
-        bufferSize = strlen(man->par->buffer);
-		if (bufferSize != write(fd, man->par->buffer, bufferSize))    
-		    strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
+    	serializeParameters(buffer, man->par); 
+    	write(man->connectfd,(void*) buffer, sizeof(buffer));
+
+		close(fd);
 	}
-
-	pthread_mutex_unlock(&(syncro->mutexWrite));
-
-    serializeParameters(buffer, man->par); 
-    write(man->connectfd,(void*) buffer, sizeof(buffer)); 
-    
-	close(fd);
+	
     return NULL;
 }
 
@@ -213,24 +215,25 @@ void* readThread(void* arg){
 		if ((offset = lseek(fd, (off_t) 0, SEEK_END)) == -1){
 		    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
     
-    	 }else if(offset == 0){
-	            strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER);
-	            man->par->error = 2;
+    	}else if(offset == 0){
+	        strncpy(man->par->buffer,"ERRORE: Il File è vuoto\0",DIM_BUFFER);
+	        man->par->error = 2;
 
-             	}else if(offset < man->par->to){ 	  
-    	            strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER);
-    	            man->par->error = 1;
+        }else if(offset <= man->par->to){ 	  
+    	    strncpy(man->par->buffer,"ERRORE: l'offset è troppo grande\0",DIM_BUFFER);
+    	    man->par->error = 1;
 	   
-                	}else{
-		                if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1)       
-		                    strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
-
-	                	if (bufferSize != read(fd, bufferFile, bufferSize))    
-		                    strncpy(man->par->buffer,"ERRORE: lettura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
-
-	                    bufferFile[bufferSize]='\0';	 
-	    	            strncpy(man->par->buffer,bufferFile,DIM_BUFFER);
-                 	} 
+        }else{
+		    if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1){      
+		        strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+			}else if (bufferSize != read(fd, bufferFile, bufferSize)){   
+		        strncpy(man->par->buffer,"ERRORE: lettura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
+			}
+			else{
+				bufferFile[bufferSize]='\0';	 
+	    		strncpy(man->par->buffer,bufferFile,DIM_BUFFER);
+			}
+        } 
  	
         pthread_mutex_lock(&(syncro->mutexRead));
 	    syncro->numReader--;
