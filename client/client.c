@@ -20,7 +20,7 @@ int main(int argc, const char ** argv){
 
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
-    	printf("Usage: %s <IP address> <TCP port>\n", argv[0]);
+    	printf("Usage: %s <IP address/domain name> <TCP port>\n", argv[0]);
     	return err;
   	}
 
@@ -34,13 +34,13 @@ int main(int argc, const char ** argv){
 	} 
 	
 	bzero(&servaddr, sizeof(servaddr)); 
-
 	// assegnazione IP, PORT 
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
-	servaddr.sin_port = htons(PORT);
 	
-	// connessione client - server tramite socket
+	servaddr.sin_port = htons(PORT);
+
+	// connessione client  - server tramite socket
 	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 
 		perror("Connessione con il server fallita"); 
 		exit(0); 
