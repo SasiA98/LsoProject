@@ -96,7 +96,7 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 	int connectfd = *((int *)arg);
     pthread_t threadDim, threadRead, threadWrite;
 
-   	uchar buffer[DIM_BUFFER]={};
+   	uchar buffer[DIM_PARAMETERS]={};
 
     parameters *par = (parameters *)malloc(sizeof(parameters));
 	management *man = (management *)malloc(sizeof(management));
@@ -142,12 +142,14 @@ void* writeThread(void* arg){
 	int fd, bufferSize, dim;
 	uchar buffer[DIM_PARAMETERS]={};
 
-    if ((fd = open(nameFile, O_WRONLY)) == -1){
+	if ((fd = open(nameFile, O_WRONLY)) == -1){
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
 	}else{
 		pthread_mutex_lock(&(syncro->mutexWrite));
 
-    	if(dimension < (man->par->from + strlen(man->par->buffer))){
+		if((bufferSize = strlen(man->par->buffer))==DIM_BUFFER-1){
+			strncpy(man->par->buffer,"ERRORE: Limite numero caratteri raggiunto\0",DIM_BUFFER), man->par->error = 1;
+		}else if(dimension < (man->par->from + strlen(man->par->buffer))){
 	    	strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER), man->par->error = 1;
 
 		}else{
@@ -162,13 +164,11 @@ void* writeThread(void* arg){
 					spaces[i] = ' ';
 				}
 				write(fd,(void*)spaces,lenght);
-				bufferSize = strlen(man->par->buffer);
 				if (bufferSize != write(fd, man->par->buffer, bufferSize))    
 		    		strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 			}else if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1){       
 		    	strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
 			}else{
-        		bufferSize = strlen(man->par->buffer);
 				if (bufferSize != write(fd, man->par->buffer, bufferSize))    
 		    		strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 			}
