@@ -161,10 +161,7 @@ void* writeThread(void* arg){
 				for(int i=0;i<lenght;i++){
 					spaces[i] = ' ';
 				}
-				write(fd,(void*)spaces,lenght);
-				bufferSize = strlen(man->par->buffer);
-				if (bufferSize != write(fd, man->par->buffer, bufferSize))    
-		    		strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
+				write(fd,(void*)spaces,lenght); 
 			}else if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1){       
 		    	strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
 			}else{
