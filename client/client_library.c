@@ -16,7 +16,8 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
         return 1;
     }
     
- /*   struct hostent *host = gethostbyname(argv[1]);
+    /*
+    struct hostent *host = gethostbyname(argv[1]);
 
     if(host){
         strncpy(IP_PORT,host->h_addr_list[0],29);
@@ -24,8 +25,9 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
          herror("Error gethostbyname");
          return 4;
     }
-   */
 
+    */
+    
     // Controllo che il secondo argomento rispetti i vincoli.
     char *p = NULL;
     int a = (int) strtol(argv[2], &p, 10);
@@ -34,7 +36,8 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
 
     PORT=a;
     strncpy(IP_PORT,argv[1],29);
-    
+
+
     return 0;
 }
 
