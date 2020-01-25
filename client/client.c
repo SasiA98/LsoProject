@@ -3,13 +3,6 @@
 
 int main(int argc, const char ** argv){
 
-//---------DA CANCELLARE-----------
-	argc=3;
-	argv[1]="127.0.0.1";
-	argv[2]="8080";
-
-//---------------------------------
-
 	signal(SIGPIPE,hendler);
 	signal(SIGINT,hendler);
 	signal(SIGTERM,hendler);
@@ -33,7 +26,6 @@ int main(int argc, const char ** argv){
 		exit(0); 
 	} 
 	
-	bzero(&servaddr, sizeof(servaddr)); 
 	// assegnazione IP, PORT 
 	servaddr.sin_family = AF_INET; 
 	servaddr.sin_addr.s_addr = inet_addr(IP_PORT);
