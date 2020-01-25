@@ -10,11 +10,10 @@ void handler(int signal){
 	pthread_mutex_destroy(&(syncro->mutexWrite));
 	pthread_mutex_destroy(&(syncro->mutexRead));
 	free(syncro);
-	perror("Fine del programma");
+	perror("Fine del programma\n");
 	exit(1);
 	
 }
-
 
 
 int checkArgsInvalidServer(int argc, const char *argv[]){
@@ -59,7 +58,6 @@ int checkArgsInvalidServer(int argc, const char *argv[]){
 }
 
 
-
 int CreateSocket(){
 
     int socketfd;
@@ -89,7 +87,6 @@ int CreateSocket(){
 }
 
 
-
 void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client.
 
     bool flag = true;
@@ -104,7 +101,7 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 
 	while(flag){
 		
-        if(read(connectfd, buffer, sizeof(buffer))<=0) // I have changed, check if works 
+        if(read(connectfd, buffer, sizeof(buffer))<=0)
 		   flag = false;
 		else{
 		    deserializeParameters(buffer, par);
@@ -132,6 +129,46 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 	return NULL;
 }
 
+
+void* dimThread(void* arg){ 
+    
+	management *man = ((management *) arg);
+	man->par->numRequest++;
+
+    uchar buffer[DIM_PARAMETERS]={}; 
+	int fd, dim=0;
+
+    if ((fd = open(nameFile, O_RDONLY)) == -1){ 
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
+    }else{
+		pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader++;
+	
+		if ((syncro->numReader)==1) 
+	    	pthread_mutex_lock(&(syncro->mutexWrite));
+		pthread_mutex_unlock(&(syncro->mutexRead));
+
+    	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
+			strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+		}else{
+        	man->par->dimFile=dim;
+    	}
+
+		pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader--;
+
+		if ((syncro->numReader)==0) 
+	    	pthread_mutex_unlock(&(syncro->mutexWrite));
+		pthread_mutex_unlock(&(syncro->mutexRead));
+
+		close(fd);
+	}
+
+	serializeParameters(buffer, man->par); 
+  	write(man->connectfd,(void*) buffer, sizeof(buffer)); 
+
+    return NULL;
+}
 
 
 void* writeThread(void* arg){   
@@ -185,8 +222,7 @@ void* writeThread(void* arg){
     return NULL;
 }
 
-
-   
+  
 void* readThread(void* arg){ 
    	
 	management *man = ((management *) arg);
@@ -249,47 +285,5 @@ void* readThread(void* arg){
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) buffer, sizeof(buffer)); 
     
-    return NULL;
-} 
-
-
-
-void* dimThread(void* arg){ 
-    
-	management *man = ((management *) arg);
-	man->par->numRequest++;
-
-    uchar buffer[DIM_PARAMETERS]={}; 
-	int fd, dim=0;
-
-    if ((fd = open(nameFile, O_RDONLY)) == -1){ 
-	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
-    }else{
-		pthread_mutex_lock(&(syncro->mutexRead));
-		syncro->numReader++;
-	
-		if ((syncro->numReader)==1) 
-	    	pthread_mutex_lock(&(syncro->mutexWrite));
-		pthread_mutex_unlock(&(syncro->mutexRead));
-
-    	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-			strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
-		}else{
-        	man->par->dimFile=dim;
-    	}
-
-		pthread_mutex_lock(&(syncro->mutexRead));
-		syncro->numReader--;
-
-		if ((syncro->numReader)==0) 
-	    	pthread_mutex_unlock(&(syncro->mutexWrite));
-		pthread_mutex_unlock(&(syncro->mutexRead));
-
-		close(fd);
-	}
-
-	serializeParameters(buffer, man->par); 
-  	write(man->connectfd,(void*) buffer, sizeof(buffer)); 
-
     return NULL;
 } 
