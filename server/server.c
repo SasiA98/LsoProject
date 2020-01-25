@@ -2,14 +2,6 @@
 
 int main(int argc, const char** argv){
 
-//---------DA CANCELLARE-----------
-	argc=4;
-	argv[1]="8080";
-	argv[2]="../file/Document.txt";
-	argv[3]="1000";
-
-//---------------------------------
-
 	signal(SIGPIPE,SIG_IGN);
 	signal(SIGINT, handler);
 	signal(SIGQUIT, handler);
