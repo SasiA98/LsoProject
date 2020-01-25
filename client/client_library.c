@@ -3,12 +3,10 @@
 parameters* par;
 
 
-
 void hendler(int signal){
     perror("Fine del programma\n");
 	exit(1);
 }
-
 
 
 int checkArgsInvalidClient(int argc, const char *argv[]){
@@ -42,7 +40,6 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
 }
 
 
-
 void getStr(char * str, uint len){ //Funzione per la lettura da tastiera di stringhe.
     assert(str != NULL);
     uint i;
@@ -53,7 +50,6 @@ void getStr(char * str, uint len){ //Funzione per la lettura da tastiera di stri
     while ((i>=len) && (c = getchar()) != '\n' && c != EOF) { }
     str[i] = '\0';
 }
-
 
 
 int getInt(){ //Funzione per la lettura da tastiera di numeri.
@@ -75,7 +71,6 @@ int getInt(){ //Funzione per la lettura da tastiera di numeri.
 }
 
 
-
 void faultyConnection(int numRequest, parameters *par){
     if(numRequest==par->numRequest){
 		fprintf(stderr,"La connessione e' caduta");
@@ -83,7 +78,6 @@ void faultyConnection(int numRequest, parameters *par){
         exit(1);
     }
 }
-
 
 
 void clientFunctions(int socketfd){ 
@@ -125,7 +119,6 @@ void clientFunctions(int socketfd){
 }
 
 
-
 void dimension(int socketfd, parameters *par){
     
     uchar bufferR[DIM_PARAMETERS]={}, bufferW[DIM_PARAMETERS]={};
@@ -135,7 +128,7 @@ void dimension(int socketfd, parameters *par){
     serializeParameters(bufferW, par);
     write(socketfd,bufferW,sizeof(bufferW)); 
     
-    if(read(socketfd, bufferR, sizeof(bufferR))>0)  // We should evaluate the case in witch the function doesn'read all the bytes from socket : sasi 
+    if(read(socketfd, bufferR, sizeof(bufferR))>0)
         deserializeParameters(bufferR, par);
 
     faultyConnection(numRequest,par);
@@ -148,7 +141,6 @@ void dimension(int socketfd, parameters *par){
     }
     
 }
-
 
 
 void writeFile(int socketfd,parameters *par){
@@ -190,7 +182,6 @@ void writeFile(int socketfd,parameters *par){
 
     } while (par->error != 0);
 }
-
 
 
 void readFile(int socketfd, parameters *par){
