@@ -158,8 +158,6 @@ void writeFile(int socketfd,parameters *par){
             par->from=getInt(); 
             printf("Inserisci contenuto (MAX %d): ", DIM_BUFFER-2);
             getStr(par->buffer,DIM_BUFFER-1);
-
-            printf("dim:%ld\nstring:%s\n",strlen(par->buffer),par->buffer);
         
             if(par->from < 0) 
                printf("Errore: 'from' dev'essere maggiore o uguale di '0'\n\n");
