@@ -16,15 +16,21 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
         return 1;
     }
     
- /*   struct hostent *host = gethostbyname(argv[1]);
+    
+    struct in_addr **addr_list;
+    struct hostent *host = gethostbyname(argv[1]);
 
-    if(host){
-        strncpy(IP_PORT,host->h_addr_list[0],29);
-    } else{
+
+    if(host!=NULL){
+        addr_list=(struct in_addr **)host->h_addr_list;
+        for(int i = 0; addr_list[i] != NULL; i++){
+		    strcpy(IP_PORT , inet_ntoa(*addr_list[i]) );
+            }
+    }else{
          herror("Error gethostbyname");
          return 4;
     }
-   */
+
 
     // Controllo che il secondo argomento rispetti i vincoli.
     char *p = NULL;
@@ -33,8 +39,8 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
         return 3;
 
     PORT=a;
-    strncpy(IP_PORT,argv[1],29);
-    
+
+
     return 0;
 }
 
@@ -161,8 +167,10 @@ void writeFile(int socketfd,parameters *par){
             printf("Inserisci la posizione da cui iniziare a scrivere\n");
             printf("From: ");
             par->from=getInt(); 
-            printf("Inserisci contenuto (MAX %d): ", DIM_BUFFER-1);
-            getStr(par->buffer,DIM_BUFFER-1); //If stdin get over dim_buffer (?)
+            printf("Inserisci contenuto (MAX %d): ", DIM_BUFFER-2);
+            getStr(par->buffer,DIM_BUFFER-1);
+
+            printf("dim:%ld\nstring:%s\n",strlen(par->buffer),par->buffer);
         
             if(par->from < 0) 
                printf("Errore: 'from' dev'essere maggiore o uguale di '0'\n\n");

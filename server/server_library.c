@@ -96,7 +96,7 @@ void* mainThread(void* arg){ //Thread per la gestione delle richieste dal Client
 	int connectfd = *((int *)arg);
     pthread_t threadDim, threadRead, threadWrite;
 
-   	uchar buffer[DIM_BUFFER]={};
+   	uchar buffer[DIM_PARAMETERS]={};
 
     parameters *par = (parameters *)malloc(sizeof(parameters));
 	management *man = (management *)malloc(sizeof(management));
@@ -142,12 +142,14 @@ void* writeThread(void* arg){
 	int fd, bufferSize, dim;
 	uchar buffer[DIM_PARAMETERS]={};
 
-    if ((fd = open(nameFile, O_WRONLY)) == -1){
+	if ((fd = open(nameFile, O_WRONLY)) == -1){
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
 	}else{
 		pthread_mutex_lock(&(syncro->mutexWrite));
 
-    	if(dimension < (man->par->from + strlen(man->par->buffer))){
+		if((bufferSize = strlen(man->par->buffer))==DIM_BUFFER-1){
+			strncpy(man->par->buffer,"ERRORE: Limite numero caratteri raggiunto\0",DIM_BUFFER), man->par->error = 1;
+		}else if(dimension < (man->par->from + strlen(man->par->buffer))){
 	    	strncpy(man->par->buffer,"ERRORE: Il file raggiunge una dimensione non consentita\0",DIM_BUFFER), man->par->error = 1;
 
 		}else{
@@ -161,11 +163,12 @@ void* writeThread(void* arg){
 				for(int i=0;i<lenght;i++){
 					spaces[i] = ' ';
 				}
-				write(fd,(void*)spaces,lenght); 
+				write(fd,(void*)spaces,lenght);
+				if (bufferSize != write(fd, man->par->buffer, bufferSize))    
+		    		strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 			}else if (lseek(fd, (off_t) man->par->from, SEEK_SET) == -1){       
 		    	strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
 			}else{
-        		bufferSize = strlen(man->par->buffer);
 				if (bufferSize != write(fd, man->par->buffer, bufferSize))    
 		    		strncpy(man->par->buffer,"ERRORE: scrittura su file non corretta\0",DIM_BUFFER), man->par->error = 1;
 			}
@@ -173,11 +176,11 @@ void* writeThread(void* arg){
 
 		pthread_mutex_unlock(&(syncro->mutexWrite));
 
-    	serializeParameters(buffer, man->par); 
-    	write(man->connectfd,(void*) buffer, sizeof(buffer));
-
 		close(fd);
 	}
+
+	serializeParameters(buffer, man->par); 
+	write(man->connectfd,(void*) buffer, sizeof(buffer));
 	
     return NULL;
 }
@@ -194,15 +197,12 @@ void* readThread(void* arg){
 	uchar buffer[DIM_PARAMETERS]={};
 
 	int bufferSize = man->par->to - man->par->from +1; 
-
-    if ((fd = open(nameFile, O_RDONLY)) == -1)
-	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
   
-    if(bufferSize > DIM_BUFFER-1)
+    if(bufferSize > DIM_BUFFER-1){
 	    strncpy(man->par->buffer,"ERRORE: La richiesta ha superato la dimensione massima.\0",DIM_BUFFER),  man->par->error = 1;
-
-
-    if(man->par->error != 1){
+	}else if ((fd = open(nameFile, O_RDONLY)) == -1){
+	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
+	}else if(man->par->error != 1){
        
 	    pthread_mutex_lock(&(syncro->mutexRead));
 		syncro->numReader++;
@@ -242,12 +242,13 @@ void* readThread(void* arg){
         	pthread_mutex_unlock(&(syncro->mutexWrite));
 		}
 		pthread_mutex_unlock(&(syncro->mutexRead));
+
+		close(fd);
 	}
 
     serializeParameters(buffer, man->par); 
     write(man->connectfd,(void*) buffer, sizeof(buffer)); 
     
-	close(fd);
     return NULL;
 } 
 
@@ -263,33 +264,32 @@ void* dimThread(void* arg){
 
     if ((fd = open(nameFile, O_RDONLY)) == -1){ 
 	    strncpy(man->par->buffer,"ERRORE: Il file non e' stato aperto\0",DIM_BUFFER), man->par->error = 1;
-    }
-
-	pthread_mutex_lock(&(syncro->mutexRead));
-	syncro->numReader++;
+    }else{
+		pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader++;
 	
-	if ((syncro->numReader)==1) 
-	    pthread_mutex_lock(&(syncro->mutexWrite));
-	pthread_mutex_unlock(&(syncro->mutexRead));
+		if ((syncro->numReader)==1) 
+	    	pthread_mutex_lock(&(syncro->mutexWrite));
+		pthread_mutex_unlock(&(syncro->mutexRead));
 
-    if ((dim=lseek(fd, 0, SEEK_END)) == -1){
-		strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
-    
-	}else{
-        man->par->dimFile=dim;
-    }
+    	if ((dim=lseek(fd, 0, SEEK_END)) == -1){
+			strncpy(man->par->buffer,"ERRORE: funzione lseek fallita\0",DIM_BUFFER), man->par->error = 1;
+		}else{
+        	man->par->dimFile=dim;
+    	}
 
-	pthread_mutex_lock(&(syncro->mutexRead));
-	syncro->numReader--;
+		pthread_mutex_lock(&(syncro->mutexRead));
+		syncro->numReader--;
 
-	if ((syncro->numReader)==0) 
-	    pthread_mutex_unlock(&(syncro->mutexWrite));
-	pthread_mutex_unlock(&(syncro->mutexRead));
-    
+		if ((syncro->numReader)==0) 
+	    	pthread_mutex_unlock(&(syncro->mutexWrite));
+		pthread_mutex_unlock(&(syncro->mutexRead));
+
+		close(fd);
+	}
 
 	serializeParameters(buffer, man->par); 
   	write(man->connectfd,(void*) buffer, sizeof(buffer)); 
 
-    close(fd); 
     return NULL;
 } 

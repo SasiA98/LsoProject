@@ -12,7 +12,7 @@
 #include "../protocol/protocol.h"
 
 int PORT;
-char IP_PORT[30];
+char IP_PORT[100];
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
