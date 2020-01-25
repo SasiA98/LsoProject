@@ -5,7 +5,7 @@ int main(int argc, const char ** argv){
 
 //---------DA CANCELLARE-----------
 	argc=3;
-	argv[1]="127.0.0.1";
+	argv[1]="www.google.it";
 	argv[2]="8080";
 
 //---------------------------------

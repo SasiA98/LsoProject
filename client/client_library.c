@@ -16,16 +16,13 @@ int checkArgsInvalidClient(int argc, const char *argv[]){
         return 1;
     }
     
-    
-    struct in_addr **addr_list;
     struct hostent *host = gethostbyname(argv[1]);
 
 
     if(host!=NULL){
-        addr_list=(struct in_addr **)host->h_addr_list;
-        for(int i = 0; addr_list[i] != NULL; i++){
-		    strcpy(IP_PORT , inet_ntoa(*addr_list[i]) );
-            }
+        struct in_addr *addr = (struct in_addr *) host->h_addr_list[0];
+		strcpy(IP_PORT , inet_ntoa(*addr) );
+        
     }else{
          herror("Error gethostbyname");
          return 4;
