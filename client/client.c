@@ -9,13 +9,14 @@ int main(int argc, const char ** argv){
 	signal(SIGILL,hendler);
 	signal(SIGQUIT,hendler);
 
-    printf("\n\n----------------------- LSO PROJECT -----------------------\n\n");
 
 	int err;
 	if ((err=checkArgsInvalidClient(argc, argv))) {
     	printf("Usage: %s <IP address/domain name> <TCP port>\n", argv[0]);
     	return err;
   	}
+
+	printf("\n\n----------------------- LSO PROJECT -----------------------\n\n");
 
 	int socketfd; 
 	struct sockaddr_in servaddr; 
