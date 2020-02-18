@@ -16,14 +16,13 @@ int main(int argc, const char ** argv){
     	return err;
   	}
 
-	printf("\n\n----------------------- LSO PROJECT -----------------------\n\n");
 
 	int socketfd; 
 	struct sockaddr_in servaddr; 
 
     socketfd = socket(AF_INET, SOCK_STREAM, 0); 
 	if (socketfd == -1) { 
-		perror("Creazione della socket fallita"); 
+		perror("Creazione della socket fallita\n"); 
 		exit(0); 
 	} 
 	
@@ -34,13 +33,15 @@ int main(int argc, const char ** argv){
 
 	// connessione client  - server tramite socket
 	if (connect(socketfd, (struct sockaddr*)&servaddr, sizeof(servaddr)) != 0) { 
-		perror("Connessione con il server fallita"); 
+		perror("Connessione con il server fallita\n"); 
 		exit(0); 
 	}
 	else
 		printf("Connesso al server...\n"); 
 
-	printf("\n\n");	
+
+	printf("\n\n----------------------- LSO PROJECT -----------------------\n\n");
+
 	clientFunctions(socketfd); 
 	
 	// chiusura della socket 
